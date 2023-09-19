@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .box {
+        @apply w-96 mx-auto my-4 p-6 bg-cyan-500 max-[600px]:bg-sky-300
+    }
+    .btn-primary {
+      @apply rounded bg-white p-2 border border-solid border-black rounded hover:bg-sky-700 hover:text-white w-24
+    }
+}
