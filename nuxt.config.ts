@@ -8,4 +8,14 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
+  modules: [
+    // Simple usage
+    'nuxt-highcharts',
+
+    // With options
+    ['nuxt-highcharts', { /* module options */ }]
+  ],
+  highcharts: {
+    /* module options */
+  }
 })

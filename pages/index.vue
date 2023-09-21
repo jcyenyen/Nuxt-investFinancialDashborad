@@ -6,20 +6,13 @@
       測試用
     </button>
   </div>
+  <!-- <div>
+    <highchart :options="chartOptions" />
+  </div> -->
 </template>
 <script setup></script>
 <style>
-/* .box {
-    width: 384px;
-    margin: 16px auto;
-    background-color: rgb(6 182 212);
-    padding: 24px;
-  }
-  button {
-    width: 100px;
-    border-radius: 4px;
-    border: 1px solid black;
-    background-color: white;
-    padding: 8px;
-  } */
+.box1 {
+  background-color: #2d30ce;
+}
 </style>
