@@ -370,11 +370,6 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@highcharts/map-collection@^2.0.0":
-  version "2.1.0"
-  resolved "https://registry.npmjs.org/@highcharts/map-collection/-/map-collection-2.1.0.tgz"
-  integrity sha512-oS7ELhgvltY7OVPG4EFHHcdLRSKu2Fwvg2B9eXRo/Get4rZPUoLwv5i+bUcPb5JYLxzhHVNniuw01yMJAnXJ8g==
-
 "@ioredis/commands@^1.1.1":
   version "1.2.0"
   resolved "https://registry.npmjs.org/@ioredis/commands/-/commands-1.2.0.tgz"
@@ -1407,6 +1402,15 @@ available-typed-arrays@^1.0.5:
   version "1.0.5"
   resolved "https://registry.npmjs.org/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz"
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
+
+axios@*, axios@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.npmjs.org/axios/-/axios-1.5.0.tgz"
+  integrity sha512-D4DdjDo5CY50Qms0qGQTTw6Q44jl7zRwY7bthds06pUGfChBCTcQs+N743eFWGEd6pRTMd6A+I87aWyFV5wiZQ==
+  dependencies:
+    follow-redirects "^1.15.0"
+    form-data "^4.0.0"
+    proxy-from-env "^1.1.0"
 
 axios@^0.27.2:
   version "0.27.2"
@@ -2506,7 +2510,7 @@ flatted@^3.2.7:
   resolved "https://registry.npmjs.org/flatted/-/flatted-3.2.9.tgz"
   integrity sha512-36yxDn5H7OFZQla0/jFJmbIKTdZAQHngCedGxiMmpNfEZM0sdEeT+WczLQrjK6D7o2aiyLYDnkw0R3JK0Qv1RQ==
 
-follow-redirects@^1.14.9:
+follow-redirects@^1.14.9, follow-redirects@^1.15.0:
   version "1.15.2"
   resolved "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.2.tgz"
   integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
@@ -2879,7 +2883,12 @@ hash-sum@^2.0.0:
   resolved "https://registry.npmjs.org/hash-sum/-/hash-sum-2.0.0.tgz"
   integrity sha512-WdZTbAByD+pHfl/g9QSsBIIwy8IT+EsPiKDs0KNX+zSHhdDLFKdZu0BQHljvO+0QI/BasbMSUa8wYNCZTvhslg==
 
-highcharts@^11.1.0:
+highcharts-vue@^1.4.3:
+  version "1.4.3"
+  resolved "https://registry.npmjs.org/highcharts-vue/-/highcharts-vue-1.4.3.tgz"
+  integrity sha512-qIy9EFuLIgOw+reNkTvu0pvMBcSE0BAPtONAqZoEl0qaAIpGxiyXqhRNPDufWieSC0YlybpCznxE8EK19Kcg+A==
+
+highcharts@^11.1.0, highcharts@>=5.0.0:
   version "11.1.0"
   resolved "https://registry.npmjs.org/highcharts/-/highcharts-11.1.0.tgz"
   integrity sha512-vhmqq6/frteWMx0GKYWwEFL25g4OYc7+m+9KQJb/notXbNtIb8KVy+ijOF7XAFqF165cq0pdLIePAmyFY5ph3g==
@@ -4050,15 +4059,6 @@ nuxi@^3.8.3:
   optionalDependencies:
     fsevents "~2.3.3"
 
-nuxt-highcharts@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.npmjs.org/nuxt-highcharts/-/nuxt-highcharts-3.1.1.tgz"
-  integrity sha512-bHUl8OF1WqJ0vUlDl4AAJHk1H6+sffSAMmB3xGu0oZcav93CQMVjxkjsGabXS321KVOyz+BbOrur3UtXYM4AIA==
-  dependencies:
-    highcharts "^11.1.0"
-  optionalDependencies:
-    "@highcharts/map-collection" "^2.0.0"
-
 nuxt@^3.6.5, nuxt@^3.7.3:
   version "3.7.3"
   resolved "https://registry.npmjs.org/nuxt/-/nuxt-3.7.3.tgz"
@@ -4671,6 +4671,11 @@ protocols@^2.0.0, protocols@^2.0.1:
   version "2.0.1"
   resolved "https://registry.npmjs.org/protocols/-/protocols-2.0.1.tgz"
   integrity sha512-/XJ368cyBJ7fzLMwLKv1e4vLxOju2MNAIokcr7meSaNcVbWz/CPcW22cP04mwxOErdA5mwjA8Q6w/cdAQxVn7Q==
+
+proxy-from-env@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-1.1.0.tgz"
+  integrity sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==
 
 prr@~1.0.1:
   version "1.0.1"
@@ -5821,6 +5826,11 @@ vscode-uri@^3.0.2:
   resolved "https://registry.npmjs.org/vscode-uri/-/vscode-uri-3.0.7.tgz"
   integrity sha512-eOpPHogvorZRobNqJGhapa0JdwaxpjVvyBp0QIUMRMSf8ZAlqOdEquKuRmw9Qwu0qXtJIWqFtMkmvJjUZmMjVA==
 
+vue-axios@^3.5.2:
+  version "3.5.2"
+  resolved "https://registry.npmjs.org/vue-axios/-/vue-axios-3.5.2.tgz"
+  integrity sha512-GP+dct7UlAWkl1qoP3ppw0z6jcSua5/IrMpjB5O8bh089iIiJ+hdxPYH2NPEpajlYgkW5EVMP95ttXWdas1O0g==
+
 vue-bundle-renderer@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/vue-bundle-renderer/-/vue-bundle-renderer-2.0.0.tgz"
@@ -5840,7 +5850,7 @@ vue-router@^4.1.0, vue-router@^4.2.4:
   dependencies:
     "@vue/devtools-api" "^6.5.0"
 
-"vue@^2.7.0 || ^3.2.25", vue@^3.0.0, vue@^3.2.0, vue@^3.2.25, vue@^3.3.4, "vue@>=2.7 || >=3", vue@3.3.4:
+"vue@^2.7.0 || ^3.2.25", vue@^3.0.0, "vue@^3.0.0 || ^2.0.0", vue@^3.2.0, vue@^3.2.25, vue@^3.3.4, vue@>=1.0.0, "vue@>=2.7 || >=3", vue@3.3.4:
   version "3.3.4"
   resolved "https://registry.npmjs.org/vue/-/vue-3.3.4.tgz"
   integrity sha512-VTyEYn3yvIeY1Py0WaYGZsXnz3y5UnGi62GjVEqvEGPl6nxbOrCXbVOTQWBEJUqAyTUk2uJ5JLVnYJ6ZzGbrSw==
