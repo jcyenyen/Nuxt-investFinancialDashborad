@@ -4,9 +4,16 @@
 
 @layer components {
     .box {
-        @apply w-96 mx-auto my-4 p-6 bg-cyan-500 max-[600px]:bg-sky-300
+        @apply w-[600px] mx-auto my-4 p-6 max-[600px]:bg-sky-300
     }
     .btn-primary {
-      @apply rounded bg-white p-2 border border-solid border-black rounded hover:bg-sky-700 hover:text-white w-24
+      @apply rounded bg-white text-[16px] m-4 p-2 rounded hover:bg-sky-700 hover:text-white w-[100px]
+    }
+    .nav-a {
+      @apply m-4 p-2  bg-white rounded
+    }
+    .shadow {   
+      box-shadow: 0px 20px 25px -5px rgba(181, 181, 181, 0.25);
+      box-shadow: 0px 8px 10px -6px rgba(181, 181, 181, 0.25);
     }
 }

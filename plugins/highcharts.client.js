@@ -10,5 +10,6 @@ export default defineNuxtPlugin((nuxtApp) => {
   // 這裡就是你提到的 use
   nuxtApp.vueApp.use(HighchartsVue)
                 .use(VueAxios, axios)
-                .provide('axios', nuxtApp.vueApp.config.globalProperties.axios)  // provide 'axios'
+                // .provide('axios', nuxtApp.vueApp.config.globalProperties.axios)  // provide 'axios'
+                .provide('axios', axios)  // provide 'axios'
 })
