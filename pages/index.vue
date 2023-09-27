@@ -2,18 +2,44 @@
   <NuxtLayout name="header">
     <template #main>
       <div class="box">
-        <button class="btn-primary shadow" @click="getData('AAPL')">
+        <!-- <RouterLink :to="`/stocks/${id}`" class="nav-a shadow">首頁</RouterLink>
+        <button @click="test">test</button> -->
+        <ClientOnly>
+          <vue3-simple-typeahead
+            id="typeahead_id"
+            placeholder="搜尋股票..."
+            class="w-[300px] m-4 p-1 bg-white rounded shadow :active:border-white"
+            :items="checkData"
+            v-model="searchStock"
+            :minInputLength="1"
+            @onInput="onInputEventHandler"
+            @keydown.native.enter="searchToStock"
+            @selectItem="selectItemEventHandler"
+          >
+            <template #list-item-text="slot"
+              >
+              <div class="">
+                <span
+                class="inline-block w-[300px]  bg-white rounded shadow ms-4 mb-1 "
+                v-html="slot.boldMatchText(slot.itemProjection(slot.item))"
+                ></span>
+              </div>
+            </template>
+          </vue3-simple-typeahead>
+        </ClientOnly>
+        <button class="btn-primary shadow sticky z-10" @click="getData('AAPL')">
           Apple
         </button>
-        <button class="btn-primary shadow" @click="getData('GOOGL')">
+        <button class="btn-primary shadow z-10" @click="getData('GOOGL')">
           Google
         </button>
-        <button class="btn-primary shadow" @click="getData('META')">
+        <button class="btn-primary shadow z-10" @click="getData('META')">
           META
         </button>
-        <button class="btn-primary shadow" @click="getData('TSLA')">
+        <button class="btn-primary shadow z-10" @click="getData('TSLA')">
           Tesla
         </button>
+
       </div>
       <ClientOnly>
         <highcharts
@@ -28,36 +54,49 @@
           <li>
             <h3 class="text-center font-bold text-xl">當日上漲股票排名</h3>
           </li>
-          <li v-for="(v,i) in gainRankingOnTheDay" class="presence shadow-xl mb-6">
-            <h4 class="text-xs text-center ">{{v.name}}</h4>
+          <li
+            v-for="(v, i) in gainRankingOnTheDay"
+            class="presence shadow-xl mb-6"
+          >
+            <h4 class="text-xs text-center">{{ v.name }}</h4>
             <div class="flex items-end justify-center mt-3 text-[#56a556]">
-              <p class="text-3xl font-bold me-1">{{v.price}}</p>
-              <p class="text-[#56a556] font-thin">{{ `+${v.changesPercentage}%` }}</p>
-            </div>            
+              <p class="text-3xl font-bold me-1">{{ v.price }}</p>
+              <p class="text-[#56a556] font-thin">
+                {{ `+${v.changesPercentage}%` }}
+              </p>
+            </div>
           </li>
         </ul>
         <ul>
           <li>
             <h3 class="text-center font-bold text-xl">當日下跌股票排名</h3>
           </li>
-          <li v-for="(v,i) in loseRankingOnThatDay" class="presence shadow-xl mb-6">
-            <h4 class="text-xs text-center ">{{v.name}}</h4>
+          <li
+            v-for="(v, i) in loseRankingOnThatDay"
+            class="presence shadow-xl mb-6"
+          >
+            <h4 class="text-xs text-center">{{ v.name }}</h4>
             <div class="flex items-end justify-center mt-3 text-[#ff0000]">
-              <p class="text-3xl font-bold me-1">{{v.price}}</p>
-              <p class="text-[#ff0000] font-thin">{{ `${v.changesPercentage}%` }}</p>
-            </div>            
+              <p class="text-3xl font-bold me-1">{{ v.price }}</p>
+              <p class="text-[#ff0000] font-thin">
+                {{ `${v.changesPercentage}%` }}
+              </p>
+            </div>
           </li>
         </ul>
         <ul>
           <li>
             <h3 class="text-center font-bold text-xl">當日活躍股票排名</h3>
           </li>
-          <li v-for="(v,i) in activeRankingOnThatDay" class="presence shadow-xl mb-6">
-            <h4 class="text-xs text-center ">{{v.name}}</h4>
+          <li
+            v-for="(v, i) in activeRankingOnThatDay"
+            class="presence shadow-xl mb-6"
+          >
+            <h4 class="text-xs text-center">{{ v.name }}</h4>
             <div class="flex items-end justify-center mt-3 text-zinc-700">
-              <p class="text-3xl font-bold me-1">{{v.price}}</p>
+              <p class="text-3xl font-bold me-1">{{ v.price }}</p>
               <p class="font-thin">{{ `${v.changesPercentage}%` }}</p>
-            </div>            
+            </div>
           </li>
         </ul>
       </div>
@@ -81,11 +120,22 @@
 </template>
 <script setup>
 import charts from 'highcharts'
+import { useRouter } from 'vue-router'
+
 
 const axios = inject('axios')
 definePageMeta({
   layout: false,
 })
+const router = useRouter()
+const id = '998'
+const route = useRoute()
+
+const test = () => {
+  router.push(`/stocks/${id}`)
+}
+
+console.log(route)
 
 // 股票資料
 const data = ref()
@@ -94,8 +144,12 @@ const designatedStock = ref('AAPL')
 // 新聞資料
 const news = ref()
 
-watchEffect(()=>{
-  news.value?news.value.forEach((v)=>{v.authors.reverse()}):[]
+watchEffect(() => {
+  news.value
+    ? news.value.forEach((v) => {
+        v.authors.reverse()
+      })
+    : []
 })
 
 // 當日股票排名
@@ -114,26 +168,69 @@ const losersStockApi = `https://financialmodelingprep.com/api/v3/stock_market/lo
 const activesStockApi = `https://financialmodelingprep.com/api/v3/stock_market/actives?apikey=${fmp}`
 
 
+const checkData = ref([])
+const searchStock = ref('')
+const searchApi = computed(()=>{return `https://financialmodelingprep.com/api/v3/search?query=${searchStock.value}&limit=10&exchange=NASDAQ&apikey=${fmp}`})
+
+const selectItemEventHandler = (item) => {
+  console.log(item)
+  searchToStock()
+}
+
+const onInputEventHandler = (event) => {
+  console.log(event)
+  axios.get(searchApi.value).then((res)=>{
+      console.log(res)
+      checkData.value = res.data.map((v)=>v.symbol)
+    })
+}
+
+// const onInputEventHandler = async(event) => {
+//   await axios.get(searchApi)
+//         .then((res)=>{console.log(res)})
+//   console.log(event.input)
+// }
+
+const onFocusEventHandler = (event) => {
+  console.log(event.input)
+}
+
+const onBlurEventHandler = async(event) => {
+    axios.get(searchApi.value).then((res)=>{
+      console.log(res)
+      checkData.value = res.data.map((v)=>v.symbol)
+    })
+    
+}
+
+const itemProjectionFunction = (word) => {
+  console.log(word)
+  return word
+}
+
+const searchToStock = () => {
+  router.push(`/stocks/${searchStock.value}`)
+}
+
 // 取得資料
-const getData = async (stock = 'AAPL') => {
-  await axios
+const getData = (stock = 'AAPL') => {
+  axios
     .get(dataApi)
     .then((res) => {
       data.value = Object.entries(res.data['Time Series (1min)']).map(
         ([date, values]) => ({ date, ...values })
       )
       stockName.value = stock
+      return Promise.all([
+        axios.get(gainersStockApi),
+        axios.get(losersStockApi),
+        axios.get(activesStockApi),
+      ])
     })
-    .catch((err) => {
-      console.log(err)
+    .then((res) => {
+      presenceStock.value = res
+      return axios.get(newsApi)
     })
-  await Promise.all([axios.get(gainersStockApi),axios.get(losersStockApi),axios.get(activesStockApi)])
-    .then((res)=>{
-      presenceStock.value=res
-    })
-    .catch((err)=>{console.log(err)})  
-  await axios
-    .get(newsApi)
     .then((res) => {
       news.value = res.data.feed
       news.value.length = 20
@@ -145,7 +242,6 @@ const getData = async (stock = 'AAPL') => {
 
 onMounted(() => {
   getData()
-  console.log(import.meta.env.VITE_KEY_ALPHA)
 })
 
 // 將資料轉換成[時間,股價]
@@ -249,22 +345,22 @@ const chartOptions = computed(() => {
 })
 
 // 上漲前5
-const gainRankingOnTheDay = computed(()=>{
-  const gainers = presenceStock.value?presenceStock.value[0].data:[]
+const gainRankingOnTheDay = computed(() => {
+  const gainers = presenceStock.value ? presenceStock.value[0].data : []
   gainers.length = 5
-  return presenceStock.value? gainers:undefined
+  return presenceStock.value ? gainers : undefined
 })
 
 // 下跌前5
-const loseRankingOnThatDay = computed(()=>{
-  const losers = presenceStock.value?presenceStock.value[1].data:[]
+const loseRankingOnThatDay = computed(() => {
+  const losers = presenceStock.value ? presenceStock.value[1].data : []
   losers.length = 5
   return losers
 })
 
 // 活躍前5
-const activeRankingOnThatDay = computed(()=>{
-  const actives = presenceStock.value?presenceStock.value[2].data:[]
+const activeRankingOnThatDay = computed(() => {
+  const actives = presenceStock.value ? presenceStock.value[2].data : []
   actives.length = 5
   return actives
 })
