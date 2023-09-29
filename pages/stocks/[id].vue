@@ -10,9 +10,11 @@
 import axios from 'axios'
 
 const route = useRoute()
+const id = route.params.id
+
 
 const fmp = import.meta.env.VITE_KEY_FMP
-const stockFundamentalApi = `https://financialmodelingprep.com/api/v3/profile/${route.params.id}?apikey=${fmp}`
+const stockFundamentalApi = `https://financialmodelingprep.com/api/v3/profile/${id}?apikey=${fmp}`
 
 const stockData = ref()
 

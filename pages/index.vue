@@ -2,8 +2,6 @@
   <NuxtLayout name="header">
     <template #main>
       <div class="box">
-        <!-- <RouterLink :to="`/stocks/${id}`" class="nav-a shadow">首頁</RouterLink>
-        <button @click="test">test</button> -->
         <ClientOnly>
           <vue3-simple-typeahead
             id="typeahead_id"
@@ -16,12 +14,11 @@
             @keydown.native.enter="searchToStock"
             @selectItem="selectItemEventHandler"
           >
-            <template #list-item-text="slot"
-              >
+            <template #list-item-text="slot">
               <div class="">
                 <span
-                class="inline-block w-[300px]  bg-white rounded shadow ms-4 mb-1 "
-                v-html="slot.boldMatchText(slot.itemProjection(slot.item))"
+                  class="inline-block w-[300px] bg-white rounded shadow ms-4 mb-1"
+                  v-html="slot.boldMatchText(slot.itemProjection(slot.item))"
                 ></span>
               </div>
             </template>
@@ -39,7 +36,6 @@
         <button class="btn-primary shadow z-10" @click="getData('TSLA')">
           Tesla
         </button>
-
       </div>
       <ClientOnly>
         <highcharts
@@ -100,20 +96,59 @@
           </li>
         </ul>
       </div>
-      <div v-if="news" class="flex flex-wrap justify-around">
-        <a
-          :href="v.url"
-          v-for="(v, i) in news"
-          class="inline-block box-border p-5 w-[300px] border border-solid border-black rounded shadow-2xl flex flex-col justify-around my-2"
+      <div class="flex w-[95%] mx-auto">
+        <div
+          class="w-[20%] h-[850px] p-5 border border-solid border-black rounded box-border mt-2"
         >
-          <img :src="v.banner_image" alt="" />
+          <label for="news" class="font-bold text-[18px]">股票代號搜尋</label>
+          <input
+            id="news"
+            type="text"
+            placeholder="格式(代號 代號)"
+            class="w-[100%] mb-4 mt-1 p-1 bg-white border border-solid border-black rounded shadow :active:border-white text-[14px]"
+            v-model="stockToNews"
+            @keydown.native.enter="chooseNews"
+          />
           <div>
-            <h3 class="py-1">{{ v.title }}</h3>
-            <p v-for="author in v.authors" class="text-xs">
-              {{ author }}
-            </p>
+            <label class="font-bold text-[18px]">新聞發佈時間</label>
+            <label for="start" class="block text-[14px] font-bold mt-1">從</label>
+            <input type="date" id="start" v-model="timeStart" class="text-[14px] w-[100%] mb-4 mt-1 p-1 bg-white border border-solid border-black rounded shadow">
+            <label for="end" class="block text-[14px] font-bold">到</label>
+            <input type="date" id="end" v-model="timeEnd" class="text-[14px] w-[100%] mb-4 mt-1 p-1 bg-white border border-solid border-black rounded shadow">
           </div>
-        </a>
+          <label class="font-bold text-[18px]">主題</label>
+          <div v-for="(v, name) in items" :key="v" class="mt-1">
+            <input type="checkbox" :value="name" v-model="checkedNews" />
+            <label class="font-bold text-[14px] m-2 py-2">{{ v }}</label>
+          </div>
+          <button
+            @click="chooseNews"
+            class="bg-[#4f46e5] py-1 px-2 mt-3 rounded text-white font-bold"
+          >
+            新聞篩選
+          </button>
+        </div>
+        <div
+          v-if="news !== undefined"
+          class="flex flex-wrap justify-around w-[80%]"
+        >
+          <a
+            :href="v.url"
+            v-for="(v, i) in news"
+            class="inline-block box-border p-5 w-[300px] border border-solid border-black rounded shadow-2xl flex flex-col justify-around my-2"
+          >
+            <img :src="v.banner_image" alt="" />
+            <div>
+              <h3 class="py-1">{{ v.title }}</h3>
+              <p v-for="author in v.authors" class="text-xs">
+                {{ author }}
+              </p>
+            </div>
+          </a>
+        </div>
+        <div v-else class="w-[80%] text-center text-2xl mt-[200px]">
+          <h3>交叉比對無資料,請重新搜尋..</h3>
+        </div>
       </div>
     </template>
   </NuxtLayout>
@@ -122,20 +157,12 @@
 import charts from 'highcharts'
 import { useRouter } from 'vue-router'
 
-
 const axios = inject('axios')
 definePageMeta({
   layout: false,
 })
+
 const router = useRouter()
-const id = '998'
-const route = useRoute()
-
-const test = () => {
-  router.push(`/stocks/${id}`)
-}
-
-console.log(route)
 
 // 股票資料
 const data = ref()
@@ -143,6 +170,47 @@ const designatedStock = ref('AAPL')
 
 // 新聞資料
 const news = ref()
+const checkedNews = ref([])
+const checkedNewsString = computed(() => checkedNews.value.join(','))
+const items = ref({
+  blockchain: '區塊鏈',
+  earnings: '收益',
+  ipo: 'IPO',
+  mergers_and_acquisitions: '併購',
+  financial_markets: '金融市場',
+  economy_fiscal: '財政政策（稅改、政府支出）',
+  economy_monetary: '貨幣政策（利率、通貨膨脹）',
+  economy_macro: '總體經濟',
+  energy_transportation: '能源與運輸',
+  finance: '金融',
+  life_sciences: '生命科學',
+  manufacturing: '製造業',
+  real_estate: '房地產',
+  retail_wholesale: '零售批發',
+  technology: '科技',
+})
+// 股票代號搜尋新聞
+const stockToNews = ref('')
+const checkStockToNews = computed(() => {
+  const stockToNewsArr = stockToNews.value
+    .split(' ')
+    .map((v) => `&tickers=${v}`)
+  const stockToNewsString = stockToNewsArr.join(',')
+  return stockToNewsString || ''
+})
+
+// 日期搜尋新聞
+const timeStart = ref('')
+const timeEnd = ref('')
+const timeStartStr = computed(()=>{
+  timeStart.value= timeStart.value?timeStart.value.replace(/-/g, '') + 'T0130':''
+  return timeStart.value
+})
+
+const timeEndStr = computed(()=>{
+  timeEnd.value= timeEnd.value?timeEnd.value.replace(/-/g, '') + 'T0130':''
+  return timeEnd.value
+})
 
 watchEffect(() => {
   news.value
@@ -155,62 +223,27 @@ watchEffect(() => {
 // 當日股票排名
 const presenceStock = ref()
 
+// 搜尋
+const checkData = ref([])
+const searchStock = ref('')
+
 // KEY
 const alpha = import.meta.env.VITE_KEY_ALPHA
 const fmp = import.meta.env.VITE_KEY_FMP
 
 // API
 const dataApi = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${designatedStock.value}&interval=1min&outputsize=full&apikey=${alpha}`
-const newsApi = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&topics=financial_markets&apikey=${alpha}`
+const newsApi = computed(
+  () =>
+    `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&topics=${checkedNewsString.value}${checkStockToNews.value}&time_from=${timeStartStr.value}&time_to=${timeEndStr.value}&apikey=${alpha}`
+)
 
 const gainersStockApi = `https://financialmodelingprep.com/api/v3/stock_market/gainers?apikey=${fmp}`
 const losersStockApi = `https://financialmodelingprep.com/api/v3/stock_market/losers?apikey=${fmp}`
 const activesStockApi = `https://financialmodelingprep.com/api/v3/stock_market/actives?apikey=${fmp}`
-
-
-const checkData = ref([])
-const searchStock = ref('')
-const searchApi = computed(()=>{return `https://financialmodelingprep.com/api/v3/search?query=${searchStock.value}&limit=10&exchange=NASDAQ&apikey=${fmp}`})
-
-const selectItemEventHandler = (item) => {
-  console.log(item)
-  searchToStock()
-}
-
-const onInputEventHandler = (event) => {
-  console.log(event)
-  axios.get(searchApi.value).then((res)=>{
-      console.log(res)
-      checkData.value = res.data.map((v)=>v.symbol)
-    })
-}
-
-// const onInputEventHandler = async(event) => {
-//   await axios.get(searchApi)
-//         .then((res)=>{console.log(res)})
-//   console.log(event.input)
-// }
-
-const onFocusEventHandler = (event) => {
-  console.log(event.input)
-}
-
-const onBlurEventHandler = async(event) => {
-    axios.get(searchApi.value).then((res)=>{
-      console.log(res)
-      checkData.value = res.data.map((v)=>v.symbol)
-    })
-    
-}
-
-const itemProjectionFunction = (word) => {
-  console.log(word)
-  return word
-}
-
-const searchToStock = () => {
-  router.push(`/stocks/${searchStock.value}`)
-}
+const searchApi = computed(() => {
+  return `https://financialmodelingprep.com/api/v3/search?query=${searchStock.value}&limit=10&exchange=NASDAQ&apikey=${fmp}`
+})
 
 // 取得資料
 const getData = (stock = 'AAPL') => {
@@ -229,7 +262,7 @@ const getData = (stock = 'AAPL') => {
     })
     .then((res) => {
       presenceStock.value = res
-      return axios.get(newsApi)
+      return axios.get(newsApi.value)
     })
     .then((res) => {
       news.value = res.data.feed
@@ -364,6 +397,39 @@ const activeRankingOnThatDay = computed(() => {
   actives.length = 5
   return actives
 })
+
+// 預先輸入功能
+
+const selectItemEventHandler = (item) => {
+  searchStock.value = item
+  searchToStock()
+}
+
+const onInputEventHandler = () => {
+  axios.get(searchApi.value).then((res) => {
+    checkData.value = res.data.map((v) => v.symbol)
+  })
+}
+
+const searchToStock = () => {
+  router.push(`/stocks/${searchStock.value}`)
+}
+
+// 選擇新聞類型
+
+const chooseNews = () => {
+  console.log(timeStartStr.value,timeEndStr.value)
+  axios
+    .get(newsApi.value)
+    .then((res) => {
+      console.log(res)
+      news.value = res.data.feed.length !== 0 ? res.data.feed : undefined
+      if (news.value !== undefined) news.value.length = 20
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+}
 </script>
 <style lang="scss" scoped>
 .box1 {
