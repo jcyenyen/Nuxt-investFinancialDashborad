@@ -135,6 +135,7 @@
           <a
             :href="v.url"
             v-for="(v, i) in news"
+            :key="i + '12345'"
             class="inline-block box-border p-5 w-[300px] border border-solid border-black rounded shadow-2xl flex flex-col justify-around my-2"
           >
             <img :src="v.banner_image" alt="" />
@@ -189,6 +190,7 @@ const items = ref({
   retail_wholesale: '零售批發',
   technology: '科技',
 })
+
 // 股票代號搜尋新聞
 const stockToNews = ref('')
 const checkStockToNews = computed(() => {
@@ -203,12 +205,12 @@ const checkStockToNews = computed(() => {
 const timeStart = ref('')
 const timeEnd = ref('')
 const timeStartStr = computed(()=>{
-  timeStart.value= timeStart.value?timeStart.value.replace(/-/g, '') + 'T0130':''
+  timeStart.value= timeStart.value?timeStart.value.replace(/-/g, '') + 'T0000':''
   return timeStart.value
 })
 
 const timeEndStr = computed(()=>{
-  timeEnd.value= timeEnd.value?timeEnd.value.replace(/-/g, '') + 'T0130':''
+  timeEnd.value= timeEnd.value?timeEnd.value.replace(/-/g, '') + 'T2359':''
   return timeEnd.value
 })
 
@@ -277,6 +279,8 @@ onMounted(() => {
   getData()
 })
 
+const test = new Date('2023-09-29').getTime()
+console.log(test)
 // 將資料轉換成[時間,股價]
 const realTimeOffer = computed(() => {
   return data.value
@@ -418,7 +422,7 @@ const searchToStock = () => {
 // 選擇新聞類型
 
 const chooseNews = () => {
-  console.log(timeStartStr.value,timeEndStr.value)
+  console.log(realTimeOffer.value)
   axios
     .get(newsApi.value)
     .then((res) => {
