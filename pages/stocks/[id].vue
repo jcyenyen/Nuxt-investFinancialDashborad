@@ -1,9 +1,9 @@
 <template>
   <div class="w-[70%] mx-auto mt-3">
-    <div class="selectors-container">
-      <div class="col">
+    <div class="flex w-[100%] ms-3">
+      <div class="my-1 w-[50%]">
         <label for="overlays">覆蓋指標:</label>
-        <select class="left-select" id="overlays" @change="overlaysChoose">
+        <select class="border border-solid border-black rounded shadow ms-2" id="overlays" @change="overlaysChoose">
           <option value="ema">EMA (Exponential Moving Average)</option>
           <option value="linearRegression">Linear Regression</option>
           <option value="pivotpoints">Pivot Points</option>
@@ -15,9 +15,9 @@
           <option value="vwap">VWAP (Volume Weighted Average Price)</option>
         </select>
       </div>
-      <div class="col">
-        <label for="oscillators">技術指標:</label>
-        <select class="right-select" id="oscillators" @change="OscillatorChoose">
+      <div class="my-1">
+        <label for="oscillators">振蕩指標:</label>
+        <select class="border border-solid border-black rounded shadow ms-2" id="oscillators" @change="OscillatorChoose">
           <option value="atr">ATR (Average True Range)</option>
           <option value="ao">Awesome oscillator</option>
           <option value="cci">CCI (Commodity Channel Index)</option>
@@ -37,7 +37,7 @@
         class="w-[1000px] mx-auto my-10"
         :constructor-type="'stockChart'"
         :options="chartOptions"
-        :callback="someFunction"
+        :callback="afterChartInit"
       />
     </ClientOnly>
     <!-- <button @click="test">test</button> -->
@@ -59,10 +59,6 @@
 </template>
 <script setup>
 import axios from 'axios'
-import indicators from 'highcharts/indicators/indicators'
-import macd from 'highcharts/indicators/macd'
-
-// import charts from 'highcharts'
 
 const route = useRoute()
 const id = route.params.id
@@ -192,7 +188,7 @@ const chartOptions = computed(() => {
       {
         type: 'pc',
         id: 'overlay',
-        linkedTo: `${id}`,
+        linkedTo: `${id}`,  //主要指標基於的資料id
         yAxis: 0,
       },
       {
@@ -205,13 +201,14 @@ const chartOptions = computed(() => {
   }
 })
 
-const getId = ref()
-
+// 技術指標
 const overlaysChoose = ref()
 const OscillatorChoose = ref()
 
-const someFunction = (chart) => {
-  getId.value = chart.get
+// 股票圖表建立後可用的內建function
+const afterChartInit = (chart) => {
+  console.log(chart)
+  // 更換覆蓋指標
   const overlays = (e) => {
     var series = chart.get('overlay')
     if (series) {
@@ -223,6 +220,8 @@ const someFunction = (chart) => {
       })
     }
   }
+
+  // 更換技術指標
   const oscillator = (e) => {
     var series = chart.get('oscillator')
     if (series) {
