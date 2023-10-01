@@ -339,7 +339,9 @@ const chartOptions = computed(() => {
       selected: 1,
       inputEnabled: false,
     },
-
+    accessibility: {
+      enabled:false,
+    },
     series: [
       {
         name: 'test',

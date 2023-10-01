@@ -1,14 +1,46 @@
 <template>
   <div class="w-[70%] mx-auto mt-3">
+    <div class="selectors-container">
+      <div class="col">
+        <label for="overlays">覆蓋指標:</label>
+        <select class="left-select" id="overlays" @change="overlaysChoose">
+          <option value="ema">EMA (Exponential Moving Average)</option>
+          <option value="linearRegression">Linear Regression</option>
+          <option value="pivotpoints">Pivot Points</option>
+          <option value="pc" selected="selected">Price Channel</option>
+          <option value="priceenvelopes">Price Envelopes</option>
+          <option value="sma">SMA (Simple Moving Average)</option>
+          <option value="vbp">VbP (Volume by Price)</option>
+          <option value="wma">WMA (Weighted Moving Average)</option>
+          <option value="vwap">VWAP (Volume Weighted Average Price)</option>
+        </select>
+      </div>
+      <div class="col">
+        <label for="oscillators">技術指標:</label>
+        <select class="right-select" id="oscillators" @change="OscillatorChoose">
+          <option value="atr">ATR (Average True Range)</option>
+          <option value="ao">Awesome oscillator</option>
+          <option value="cci">CCI (Commodity Channel Index)</option>
+          <option value="disparityindex">Disparity Index</option>
+          <option value="dmi">DMI (Directional Movement Index)</option>
+          <option value="macd" selected="selected">
+            MACD (Moving Average Convergence Divergence)
+          </option>
+          <option value="mfi">MFI (Money Flow Index)</option>
+          <option value="rsi">RSI (Relative Strength Index)</option>
+        </select>
+      </div>
+    </div>
     <ClientOnly>
       <highcharts
         v-if="ohlc.length !== 0"
         class="w-[1000px] mx-auto my-10"
         :constructor-type="'stockChart'"
         :options="chartOptions"
+        :callback="someFunction"
       />
     </ClientOnly>
-    <button @click="test">test</button>
+    <!-- <button @click="test">test</button> -->
   </div>
   <div class="w-[70%] mx-auto mt-3">
     <div v-for="(value, key) in stockData" :key="key" class="flex items-center">
@@ -27,6 +59,10 @@
 </template>
 <script setup>
 import axios from 'axios'
+import indicators from 'highcharts/indicators/indicators'
+import macd from 'highcharts/indicators/macd'
+
+// import charts from 'highcharts'
 
 const route = useRoute()
 const id = route.params.id
@@ -43,9 +79,12 @@ const stockData = ref()
 
 // 股票圖表資料
 const stockChart = ref()
+const stockChartRev = computed(() =>
+  stockChart.value ? stockChart.value.reverse() : []
+)
 const ohlc = computed(() => {
-  const data = stockChart.value
-    ? stockChart.value.reverse().map((v) => {
+  const data = stockChartRev.value
+    ? stockChartRev.value.map((v) => {
         const dateTimeString = v.date // 日期
         let milliseconds // 換算後的時間
         const dateObject = new Date(dateTimeString)
@@ -57,8 +96,8 @@ const ohlc = computed(() => {
 })
 
 const volume = computed(() => {
-  const data = stockChart.value
-    ? stockChart.value.map((v) => {
+  const data = stockChartRev.value
+    ? stockChartRev.value.map((v) => {
         const dateTimeString = v.date // 日期
         let milliseconds // 換算後的時間
         const dateObject = new Date(dateTimeString)
@@ -82,15 +121,10 @@ const getData = async () => {
     .get(stockChartApi)
     .then((res) => {
       stockChart.value = res.data.historical
-      console.log(stockChart.value)
     })
     .catch((rej) => {
       console.log(rej)
     })
-}
-
-const test = () => {
-  console.log(volume.value)
 }
 
 onMounted(() => {
@@ -108,21 +142,17 @@ const chartOptions = computed(() => {
     subtitle: {
       text: '所有指標',
     },
+    // 無障礙模組
     accessibility: {
-      series: {
-        descriptionFormat: '{seriesDescription}.',
-      },
-      description:
-        'Use the dropdown menus above to display different indicator series on the chart.',
-      screenReaderSection: {
-        beforeChartFormat:
-          '<{headingTagName}>{chartTitle}</{headingTagName}><div>{typeDescription}</div><div>{chartSubtitle}</div><div>{chartLongdesc}</div>',
-      },
+      enabled: false,
     },
+    // 下方圓點圖例
     legend: {
       enabled: true,
     },
+    // 範圍選擇器
     rangeSelector: {
+      // 預設第幾個:索引
       selected: 2,
     },
     yAxis: [
@@ -130,7 +160,9 @@ const chartOptions = computed(() => {
         height: '60%',
       },
       {
+        // 離頂部距離
         top: '60%',
+        // 圖高度
         height: '20%',
       },
       {
@@ -141,9 +173,6 @@ const chartOptions = computed(() => {
     plotOptions: {
       series: {
         showInLegend: true,
-        accessibility: {
-          exposeAsGroupOnly: true,
-        },
       },
     },
     series: [
@@ -155,14 +184,60 @@ const chartOptions = computed(() => {
       },
       {
         type: 'column',
-        id: '交易量',
+        id: 'volume',
         name: '交易量',
         data: volume.value,
         yAxis: 1,
-      }
-    ]
+      },
+      {
+        type: 'pc',
+        id: 'overlay',
+        linkedTo: `${id}`,
+        yAxis: 0,
+      },
+      {
+        type: 'macd',
+        id: 'oscillator',
+        linkedTo: `${id}`,
+        yAxis: 2,
+      },
+    ],
   }
 })
+
+const getId = ref()
+
+const overlaysChoose = ref()
+const OscillatorChoose = ref()
+
+const someFunction = (chart) => {
+  getId.value = chart.get
+  const overlays = (e) => {
+    var series = chart.get('overlay')
+    if (series) {
+      series.remove(false)
+      chart.addSeries({
+        type: e.target.value,
+        linkedTo: `${id}`,
+        id: 'overlay',
+      })
+    }
+  }
+  const oscillator = (e) => {
+    var series = chart.get('oscillator')
+    if (series) {
+      series.remove(false)
+      chart.addSeries({
+        type: e.target.value,
+        linkedTo: `${id}`,
+        id: 'oscillator',
+        yAxis: 2,
+      })
+    }
+  }
+  overlaysChoose.value = overlays
+  OscillatorChoose.value = oscillator
+}
 
 // 翻譯
 const translateKey = (key) => {
@@ -204,7 +279,6 @@ const translateKey = (key) => {
     isAdr: '是美國存託憑證',
     isFund: '是基金',
   }
-
   return translations[key] || key
 }
 </script>
