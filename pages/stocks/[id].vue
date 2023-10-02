@@ -3,7 +3,11 @@
     <div class="flex w-[100%] ms-3">
       <div class="my-1 w-[50%]">
         <label for="overlays">覆蓋指標:</label>
-        <select class="border border-solid border-black rounded shadow ms-2" id="overlays" @change="overlaysChoose">
+        <select
+          class="border border-solid border-black rounded shadow ms-2"
+          id="overlays"
+          @change="overlaysChoose"
+        >
           <option value="ema">EMA (Exponential Moving Average)</option>
           <option value="linearRegression">Linear Regression</option>
           <option value="pivotpoints">Pivot Points</option>
@@ -17,7 +21,11 @@
       </div>
       <div class="my-1">
         <label for="oscillators">振蕩指標:</label>
-        <select class="border border-solid border-black rounded shadow ms-2" id="oscillators" @change="OscillatorChoose">
+        <select
+          class="border border-solid border-black rounded shadow ms-2"
+          id="oscillators"
+          @change="OscillatorChoose"
+        >
           <option value="atr">ATR (Average True Range)</option>
           <option value="ao">Awesome oscillator</option>
           <option value="cci">CCI (Commodity Channel Index)</option>
@@ -40,7 +48,16 @@
         :callback="afterChartInit"
       />
     </ClientOnly>
-    <!-- <button @click="test">test</button> -->
+  </div>
+  <div class="w-[70%] mx-auto mt-3">
+    <ClientOnly>
+      <highcharts
+        v-if="stockChartFix.length !== 0"
+        class="w-[1000px] mx-auto my-10"
+        :constructor-type="'stockChart'"
+        :options="chartOptionsMulti"
+      />
+    </ClientOnly>
   </div>
   <div class="w-[70%] mx-auto mt-3">
     <div v-for="(value, key) in stockData" :key="key" class="flex items-center">
@@ -69,15 +86,33 @@ const fmp = import.meta.env.VITE_KEY_FMP
 // API
 const stockFundamentalApi = `https://financialmodelingprep.com/api/v3/profile/${id}?apikey=${fmp}`
 const stockChartApi = `https://financialmodelingprep.com/api/v3/historical-price-full/${id}?timeseries=365&apikey=${fmp}`
+const stockChart2Api = `https://financialmodelingprep.com/api/v3/historical-price-full/meta?timeseries=365&apikey=${fmp}`
+const stockChart3Api = `https://financialmodelingprep.com/api/v3/historical-price-full/googl?timeseries=365&apikey=${fmp}`
+
+const getFirstChart = axios.get(stockChartApi)
+const getSecondChart = axios.get(stockChart2Api)
+const getThirdChart = axios.get(stockChart3Api)
 
 // 股票基本資料
 const stockData = ref()
 
 // 股票圖表資料
 const stockChart = ref()
+const stockChart2 = ref()
+const stockChart3 = ref()
+
 const stockChartRev = computed(() =>
   stockChart.value ? stockChart.value.reverse() : []
 )
+
+const stockChart2Rev = computed(() =>
+  stockChart2.value ? stockChart2.value.reverse() : []
+)
+
+const stockChart3Rev = computed(() =>
+  stockChart3.value ? stockChart3.value.reverse() : []
+)
+
 const ohlc = computed(() => {
   const data = stockChartRev.value
     ? stockChartRev.value.map((v) => {
@@ -113,10 +148,13 @@ const getData = async () => {
     .catch((rej) => {
       console.log(rej)
     })
-  await axios
-    .get(stockChartApi)
+  await Promise.all([getFirstChart, getSecondChart, getThirdChart])
     .then((res) => {
-      stockChart.value = res.data.historical
+      console.log(res)
+      stockChart.value = res[0].data.historical
+      stockChart2.value = res[1].data.historical
+      stockChart3.value = res[2].data.historical
+      console.log(stockChart.value)
     })
     .catch((rej) => {
       console.log(rej)
@@ -127,6 +165,7 @@ onMounted(() => {
   getData()
 })
 
+// 單支股票
 const chartOptions = computed(() => {
   return {
     chart: {
@@ -188,7 +227,7 @@ const chartOptions = computed(() => {
       {
         type: 'pc',
         id: 'overlay',
-        linkedTo: `${id}`,  //主要指標基於的資料id
+        linkedTo: `${id}`, //主要指標基於的資料id
         yAxis: 0,
       },
       {
@@ -207,7 +246,6 @@ const OscillatorChoose = ref()
 
 // 股票圖表建立後可用的內建function
 const afterChartInit = (chart) => {
-  console.log(chart)
   // 更換覆蓋指標
   const overlays = (e) => {
     var series = chart.get('overlay')
@@ -237,6 +275,88 @@ const afterChartInit = (chart) => {
   overlaysChoose.value = overlays
   OscillatorChoose.value = oscillator
 }
+
+// 多支股票
+const fix = (stock) => {
+  const data = stock
+    ? stock.map((v) => {
+        const dateTimeString = v.date // 日期
+        let milliseconds // 換算後的時間
+        const dateObject = new Date(dateTimeString)
+        milliseconds = dateObject.getTime()
+        return [milliseconds, v.close]
+      })
+    : []
+  return data
+}
+
+const stockChartFix = computed(() => {
+  return fix(stockChartRev.value)
+})
+
+const stockChartFix2 = computed(() => {
+  return fix(stockChart2Rev.value)
+})
+
+const stockChartFix3 = computed(() => {
+  return fix(stockChart3Rev.value)
+})
+
+// 績效圖表
+const chartOptionsMulti = computed(() => {
+  return {
+    // 預設選第五個選擇器(1y)
+    rangeSelector: {
+      selected: 4,
+    },
+    yAxis: {
+      // y軸樣式
+      labels: {
+        format: '{#if (gt value 0)}+{/if}{value}%',
+      },
+      // 橫跨圖表的線
+      plotLines: [
+        {
+          value: 0,
+          width: 2,
+          color: 'silver',
+        },
+      ],
+    },
+    plotOptions: {
+      series: {
+        //數值或是%數比較
+        compare: 'percent',
+        //圖是否秀在導航列
+        showInNavigator: true,
+      },
+    },
+    tooltip: {
+      // 提示框的樣式
+      pointFormat:
+        '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
+      // Y值小數點幾位  
+      valueDecimals: 2,
+      // 提示框同時顯示
+      split: true,
+    },
+
+    series: [
+      {
+        name:`${id}`,
+        data:stockChartFix.value
+      },
+      {
+        name:'meta',
+        data:stockChartFix2.value
+      },
+      {
+        name:'googl',
+        data:stockChartFix3.value
+      }
+    ]
+  }
+})
 
 // 翻譯
 const translateKey = (key) => {
