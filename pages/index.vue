@@ -45,14 +45,14 @@
           :options="chartOptions"
         />
       </ClientOnly>
-      <div v-if="gainRankingOnTheDay" class="flex justify-around mb-5">
+      <div v-if="gainRankingOnTheDay" class="mb-5">
         <ul>
           <li>
             <h3 class="text-center font-bold text-xl">當日上漲股票排名</h3>
           </li>
           <li
             v-for="(v, i) in gainRankingOnTheDay"
-            class="presence shadow-xl mb-6"
+            class="shadow-xl mb-6 inline-block racebox"
           >
             <h4 class="text-xs text-center">{{ v.name }}</h4>
             <div class="flex items-end justify-center mt-3 text-[#56a556]">
@@ -438,7 +438,8 @@ const chooseNews = () => {
 }
 </script>
 <style lang="scss" scoped>
-.box1 {
-  background-color: #ff0000;
+.racebox:nth-child(3) {
+  width: 500px;
+  height: 500px;
 }
 </style>

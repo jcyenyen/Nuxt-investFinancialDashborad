@@ -10,7 +10,7 @@
       @apply rounded bg-white text-[16px] m-4 p-2 rounded hover:bg-sky-700 hover:text-white w-[100px]
     }
     .nav-a {
-      @apply m-4 p-2  bg-white rounded
+      @apply m-4 p-2  bg-white rounded font-bold text-xl
     }
     .shadow {   
       box-shadow: 0px 20px 25px -5px rgba(181, 181, 181, 0.25);

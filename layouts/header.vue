@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[72px] flex items-center justify-between nav">
+  <div class="h-[85px] flex items-center justify-between nav">
     <h1 class="ml-10 text-2xl">Deeping Stock</h1>
     <!-- <ClientOnly>
       <vue3-simple-typeahead
