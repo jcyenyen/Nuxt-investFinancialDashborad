@@ -34,7 +34,6 @@ const alpha = import.meta.env.VITE_KEY_ALPHA
 const searchApi = `https://financialmodelingprep.com/api/v3/search?query=APple&limit=10&exchange=NASDAQ&apikey=${alpha}`
 const test = ref(['1','2','3','11'])
 
-console.log(searchApi)
 const selectItemEventHandler = (item) => {
   alert(`Selected Item: ${item}`);
 }

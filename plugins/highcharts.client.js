@@ -23,6 +23,17 @@ import dmi from "highcharts/indicators/dmi";
 import mfi from "highcharts/indicators/mfi";
 import rsi from "highcharts/indicators/rsi";
 
+/* import the fontawesome core */
+import { library } from '@fortawesome/fontawesome-svg-core'
+
+/* import font awesome icon component */
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+/* import specific icons */
+import { faUserSecret,faCirclePlus,faCircleMinus } from '@fortawesome/free-solid-svg-icons'
+
+
+
 // import 'vue3-simple-typeahead/dist/vue3-simple-typeahead.css'; 
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -46,10 +57,15 @@ export default defineNuxtPlugin((nuxtApp) => {
   mfi(Highcharts)
   rsi(Highcharts)
 
+  /* add icons to the library */
+  library.add(faUserSecret,faCirclePlus,faCircleMinus)
+
   // 這裡就是你提到的 use
-  nuxtApp.vueApp.use(HighchartsVue)
+  nuxtApp.vueApp
+    .use(HighchartsVue)
     .use(VueAxios, axios)
     // .provide('axios', nuxtApp.vueApp.config.globalProperties.axios)  // provide 'axios'
     .provide('axios', axios)  // provide 'axios'
     .use(SimpleTypeahead)
+    .component('font-awesome-icon', FontAwesomeIcon)
 })
