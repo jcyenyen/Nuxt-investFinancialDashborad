@@ -23,6 +23,9 @@ import dmi from "highcharts/indicators/dmi";
 import mfi from "highcharts/indicators/mfi";
 import rsi from "highcharts/indicators/rsi";
 
+import treemap from "highcharts/modules/treemap";
+import coloraxis from "highcharts/modules/coloraxis";
+
 /* import the fontawesome core */
 import { library } from '@fortawesome/fontawesome-svg-core'
 
@@ -57,6 +60,8 @@ export default defineNuxtPlugin((nuxtApp) => {
   mfi(Highcharts)
   rsi(Highcharts)
 
+  treemap(Highcharts)
+  coloraxis(Highcharts)
   /* add icons to the library */
   library.add(faUserSecret,faCirclePlus,faCircleMinus)
 

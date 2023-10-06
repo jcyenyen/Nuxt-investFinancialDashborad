@@ -17,6 +17,6 @@
       box-shadow: 0px 8px 10px -6px rgba(181, 181, 181, 0.25);
     }
     .presence { 
-      @apply w-[220px] h-[80px] rounded my-4
+      @apply w-[220px] h-[80px] rounded my-4 
     }
 }
