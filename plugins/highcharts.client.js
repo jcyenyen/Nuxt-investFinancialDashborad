@@ -5,7 +5,9 @@ import axios from 'axios'
 import VueAxios from 'vue-axios'
 import SimpleTypeahead from 'vue3-simple-typeahead';
 
+// indicators indicators-all
 import indicators from 'highcharts/indicators/indicators';
+import indicatorsAll from 'highcharts/indicators/indicators-all';
 import pc from "highcharts/indicators/price-channel";
 import vwap from "highcharts/indicators/vwap";
 import pe from "highcharts/indicators/price-envelopes";
@@ -23,8 +25,24 @@ import dmi from "highcharts/indicators/dmi";
 import mfi from "highcharts/indicators/mfi";
 import rsi from "highcharts/indicators/rsi";
 
+// treemap
 import treemap from "highcharts/modules/treemap";
 import coloraxis from "highcharts/modules/coloraxis";
+import heikinashi from "highcharts/modules/heikinashi";
+import hollowcandlestick from "highcharts/modules/hollowcandlestick";
+
+// gui
+import stockTools from "highcharts/modules/stock-tools";
+import "highcharts/css/stocktools/gui.css";
+import annotations from "highcharts/modules/annotations";
+import annotationsAdvanced from "highcharts/modules/annotations-advanced";
+import dragPanes from "highcharts/modules/drag-panes";
+import fullScreen from "highcharts/modules/full-screen";
+import priceIndicator from "highcharts/modules/price-indicator";
+import exportData from "highcharts/modules/export-data";
+import exporting from "highcharts/modules/exporting";
+
+// hollowcandlestick heikinashi
 
 /* import the fontawesome core */
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -43,25 +61,39 @@ export default defineNuxtPlugin((nuxtApp) => {
   // 股票模組化
   StockModule(Highcharts)
   indicators(Highcharts)
-  pc(Highcharts)
-  vwap(Highcharts)
-  pe(Highcharts)
-  regressions(Highcharts)
-  pivotpoints(Highcharts)
-  vbp(Highcharts)
-  wma(Highcharts)
+  indicatorsAll(Highcharts)
+  // pc(Highcharts)
+  // vwap(Highcharts)
+  // pe(Highcharts)
+  // regressions(Highcharts)
+  // pivotpoints(Highcharts)
+  // vbp(Highcharts)
+  // wma(Highcharts)
 
-  macd(Highcharts)
-  ao(Highcharts)
-  atr(Highcharts)
-  cci(Highcharts)
-  disparityIndex(Highcharts)
-  dmi(Highcharts)
-  mfi(Highcharts)
-  rsi(Highcharts)
+  // macd(Highcharts)
+  // ao(Highcharts)
+  // atr(Highcharts)
+  // cci(Highcharts)
+  // disparityIndex(Highcharts)
+  // dmi(Highcharts)
+  // mfi(Highcharts)
+  // rsi(Highcharts)
+
+  heikinashi(Highcharts)
+  hollowcandlestick(Highcharts)
 
   treemap(Highcharts)
   coloraxis(Highcharts)
+  
+  stockTools(Highcharts)
+  annotations(Highcharts)
+  annotationsAdvanced(Highcharts)
+  dragPanes(Highcharts)
+  fullScreen(Highcharts)
+  priceIndicator(Highcharts)
+  exportData(Highcharts)
+  exporting(Highcharts)
+
   /* add icons to the library */
   library.add(faUserSecret,faCirclePlus,faCircleMinus)
 
