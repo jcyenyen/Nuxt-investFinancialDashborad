@@ -29,6 +29,7 @@
     "highcharts": "^11.1.0",
     "highcharts-vue": "^1.4.3",
     "vue-axios": "^3.5.2",
-    "vue3-simple-typeahead": "^1.0.11"
+    "vue3-simple-typeahead": "^1.0.11",
+    "vuedraggable": "^4.1.0"
   }
 }

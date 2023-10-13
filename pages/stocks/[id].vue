@@ -146,15 +146,33 @@
             :options="chartOptionsMulti"
           />
         </ClientOnly>
+        <draggable          
+          :list="arr"
+          group="testtt"
+          itemKey="id"
+          ghost-class="opacity-30"
+        >
+          <template #item="{ element }">
+            <TestCom />
+          </template>
+        </draggable>
+        
       </div>
     </template>
   </NuxtLayout>
 </template>
 <script setup>
 import axios from 'axios'
+import draggable from 'vuedraggable'
 
 const route = useRoute()
 const id = route.params.id
+
+const arr = [
+  {test:19,id:'1'},
+  {test:29,id:'2'},
+  {test:39,id:'3'},
+]
 
 // key
 const fmp = import.meta.env.VITE_KEY_FMP
@@ -168,7 +186,18 @@ const getFirstChart = axios.get(stockChartApi)
 
 // 股票基本資料
 const stockData = ref()
-const wantDelete = ['exchange','zip','dcfDiff','dcf','image','defaultImage','isEtf','isActivelyTrading','isAdr','isFund']
+const wantDelete = [
+  'exchange',
+  'zip',
+  'dcfDiff',
+  'dcf',
+  'image',
+  'defaultImage',
+  'isEtf',
+  'isActivelyTrading',
+  'isAdr',
+  'isFund',
+]
 
 // 股票圖表資料
 const stockChart = ref()
@@ -262,6 +291,28 @@ const chartOptions = computed(() => {
     plotOptions: {
       series: {
         showInLegend: true,
+      },
+    },
+    stockTools: {
+      gui: {
+        enabled: true, // 啟用 GUI
+        buttons: [
+          'separator',
+          'simpleShapes',
+          'lines',
+          'crookedLines',
+          'measure',
+          'advanced',
+          'toggleAnnotations',
+          'separator',
+          'verticalLabels',
+          'separator',
+          'zoomChange',
+          'fullScreen',
+          'typeChange',
+          'separator',
+          'currentPriceIndicator',
+        ], // 這是預設的按鈕列表，你可以根據需要進行調整
       },
     },
     series: [
@@ -371,7 +422,6 @@ watchEffect(() => {
   //   let {exchange,zip,dcfDiff,dcf,image,defaultImage,isEtf,isActivelyTrading,isAdr,isFund, ...desiredObject} = stockData.value
   //   stockData.value = desiredObject
   // }
-  
 })
 
 const searchApi = computed(() => {
@@ -427,6 +477,9 @@ const changeChart = async (change) => {
 // 績效圖表
 const chartOptionsMulti = computed(() => {
   return {
+    chart: {
+      height: 1000,
+    },
     // 預設選第五個選擇器(1y)
     rangeSelector: {
       selected: 4,
@@ -466,7 +519,31 @@ const chartOptionsMulti = computed(() => {
       // 提示框同時顯示
       split: true,
     },
-
+    stockTools: {
+      gui: {
+        enabled: true, // 啟用 GUI
+        buttons: [
+          'indicators',
+          'separator',
+          'simpleShapes',
+          'lines',
+          'crookedLines',
+          'measure',
+          'advanced',
+          'toggleAnnotations',
+          'separator',
+          'verticalLabels',
+          'flags',
+          'separator',
+          'zoomChange',
+          'fullScreen',
+          'typeChange',
+          'separator',
+          'currentPriceIndicator',
+          'saveChart',
+        ], // 這是預設的按鈕列表，你可以根據需要進行調整
+      },
+    },
     series: MultiChart.value,
   }
 })
@@ -516,6 +593,6 @@ const translateKey = (key) => {
 </script>
 <style lang="scss" scoped>
 .stockborder {
-  border-top: 1px solid #bebebe;
+  border-top: 1px solid #b61f1f;
 }
 </style>
