@@ -339,6 +339,11 @@ const chartOptions = computed(() => {
             [1, '#30cc5a'],
           ],
         },
+        stockTools: {
+          gui: {
+            enabled: false, // 啟用 GUI
+          },
+        },
         plotOptions: {
           treemap: {
             states: {

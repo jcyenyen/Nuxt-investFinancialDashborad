@@ -1,13 +1,13 @@
 <template>
   <NuxtLayout name="header">
     <template #main>
-      <div class="w-[90%] mx-auto my-5">
-        <div class="my-1 w-[50%]">
+      <div class="w-[90%] mx-auto mt-5 mb-10 py-10 flex flex-wrap shadow ">
+        <div class="my-1 w-[30%] flex justify-end">
           <label for="marketCap" class="font-bold">市值超過:</label>
           <select
-            class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[70%]"
+            class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[250px]"
             id="marketCap"
-            v-model="marketCap"
+            v-model="marketCapMore"
             @change="getData"
           >
             <option value="" key="none" label="請選擇" />
@@ -19,10 +19,10 @@
             />
           </select>
         </div>
-        <div class="my-1 w-[50%]">
+        <div class="my-1 w-[30%] flex justify-end">
           <label for="volume" class="font-bold">目前成交量超過:</label>
           <select
-            class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[70%]"
+            class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[250px]"
             id="volume"
             v-model="volume"
             @change="getData"
@@ -36,10 +36,10 @@
             />
           </select>
         </div>
-        <div class="my-1 w-[50%]">
+        <div class="my-1 w-[30%] flex justify-end">
           <label for="sector" class="font-bold">產業版塊:</label>
           <select
-            class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[70%]"
+            class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[250px]"
             id="sector"
             v-model="sector"
             @change="getData"
@@ -53,10 +53,10 @@
             />
           </select>
         </div>
-        <div class="my-1 w-[50%]">
+        <div class="my-1 w-[30%] flex justify-end">
           <label for="industry" class="font-bold">產業:</label>
           <select
-            class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[70%]"
+            class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[250px]"
             id="industry"
             v-model="industry"
             @change="getData"
@@ -70,10 +70,10 @@
             />
           </select>
         </div>
-        <div class="my-1 w-[50%]">
+        <div class="my-1 w-[30%] flex justify-end">
           <label for="beta" class="font-bold">Beta值低於:</label>
           <select
-            class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[70%]"
+            class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[250px]"
             id="beta"
             v-model="beta"
             @change="getData"
@@ -87,10 +87,10 @@
             />
           </select>
         </div>
-        <div class="my-1 w-[50%]">
+        <div class="my-1 w-[30%] flex justify-end">
           <label for="dividend" class="font-bold">股息:</label>
           <select
-            class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[70%]"
+            class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[250px]"
             id="dividend"
             v-model="dividend"
             @change="getData"
@@ -143,7 +143,12 @@ const fmp = import.meta.env.VITE_KEY_FMP
 
 // api
 
-const marketCap = ref('10000000000')
+const marketCapMore = ref('10000000000')
+const marketCapLower = computed(()=>{
+  const match = marketCapOption.value.find((v)=>v.lower === marketCapMore.value)
+  console.log(match)
+  return match
+})
 const volume = ref('50000')
 const sector = ref('Technology')
 const industry = ref('Software—Infrastructure')
@@ -151,10 +156,15 @@ const dividend = ref('0')
 const beta = ref('1.5')
 
 const marketCapOption = ref([
-  {label:'超過5000萬美元',value:'50000000'},
-  {label:'超過3億美元',value:'300000000'},
-  {label:'超過20億美元',value:'2000000000'},
-  {label:'超過100億美元',value:'10000000000'},
+  {label:'特大型(200億美元以上)',value:'20000000000',lower:''},
+  {label:'大型(10億美元至200億美元)',value:'1000000001',lower:'20000000000'},
+  {label:'中型(2億美元至10億美元)',value:'200000001',lower:'1000000000'},
+  {label:'小型(300萬美元至2億美元)',value:'3000001',lower:'200000000'},
+  {label:'微型(50萬美元至300萬美元)',value:'500000',lower:'3000000'},
+  {label:'超過5000萬美元',value:'50000000',lower:''},
+  {label:'超過3億美元',value:'300000000',lower:''},
+  {label:'超過20億美元',value:'2000000000',lower:''},
+  {label:'超過100億美元',value:'10000000000',lower:''},
 ])
 const volumeOption = ref([
   {label:'超過5萬',value:'50000'},
@@ -181,7 +191,7 @@ const betaOption = ref([
   {label:'低於2',value:'2'},
 ])
 
-const stockApi =computed(()=>`https://financialmodelingprep.com/api/v3/stock-screener?marketCapMoreThan=${marketCap.value}&volumeMoreThan=${volume.value}&sector=${sector.value}&industry=${industry.value}&dividendMoreThan=${dividend.value}&betaLowerThan=${beta.value}&limit=500&apikey=${fmp}`)
+const stockApi =computed(()=>`https://financialmodelingprep.com/api/v3/stock-screener?marketCapMoreThan=${marketCapMore.value}&marketCapLowerThan=${marketCapLower.value}&volumeMoreThan=${volume.value}&sector=${sector.value}&industry=${industry.value}&dividendMoreThan=${dividend.value}&betaLowerThan=${beta.value}&limit=500&apikey=${fmp}`)
 
 const sectorApi = `https://financialmodelingprep.com/api/v3/sector-performance?apikey=${fmp}`
 

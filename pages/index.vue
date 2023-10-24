@@ -1,7 +1,7 @@
 <template>
   <NuxtLayout name="header">
     <template #main>
-      <div class="box">
+      <!-- <div>
         <ClientOnly>
           <vue3-simple-typeahead
             id="typeahead_id"
@@ -24,7 +24,20 @@
             </template>
           </vue3-simple-typeahead>
         </ClientOnly>
-        <button class="btn-primary shadow sticky z-10" @click="getData('AAPL')">
+      </div> -->
+      <div class="box">
+        <div
+          v-for="v in buttons"
+          class="btn-primary shadows sticky text-center w-[24%] "
+          @click="getData(v.symbol)"
+        >
+          <h3 class="text-[24px] font-bold" @click.self="router.push(`/stocks/${v.symbol}`)">{{ v.name }}</h3>
+          <div class="flex items-center justify-center">
+            <p class="font-[600]">{{ v.price }}<span class="text-[12px]">USD</span></p>
+            <p class="ms-3" :class="v.changesPercentage>0?'text-[#56a556]':'text-[#ff0000]'">{{ v.changesPercentage }}%</p>
+          </div>
+        </div>
+        <!-- <button class="btn-primary shadow sticky z-10" @click="getData('AAPL')">
           Apple
         </button>
         <button class="btn-primary shadow z-10" @click="getData('GOOGL')">
@@ -35,12 +48,12 @@
         </button>
         <button class="btn-primary shadow z-10" @click="getData('TSLA')">
           Tesla
-        </button>
+        </button> -->
       </div>
       <ClientOnly>
         <highcharts
           v-if="realTimeOffer"
-          class="w-[1000px] mx-auto my-10"
+          class="h-[600px] mx-auto my-10"
           :constructor-type="'stockChart'"
           :options="chartOptions"
         />
@@ -111,10 +124,22 @@
           />
           <div>
             <label class="font-bold text-[18px]">新聞發佈時間</label>
-            <label for="start" class="block text-[14px] font-bold mt-1">從</label>
-            <input type="date" id="start" v-model="timeStart" class="text-[14px] w-[100%] mb-4 mt-1 p-1 bg-white border border-solid border-black rounded shadow">
+            <label for="start" class="block text-[14px] font-bold mt-1"
+              >從</label
+            >
+            <input
+              type="date"
+              id="start"
+              v-model="timeStart"
+              class="text-[14px] w-[100%] mb-4 mt-1 p-1 bg-white border border-solid border-black rounded shadow"
+            />
             <label for="end" class="block text-[14px] font-bold">到</label>
-            <input type="date" id="end" v-model="timeEnd" class="text-[14px] w-[100%] mb-4 mt-1 p-1 bg-white border border-solid border-black rounded shadow">
+            <input
+              type="date"
+              id="end"
+              v-model="timeEnd"
+              class="text-[14px] w-[100%] mb-4 mt-1 p-1 bg-white border border-solid border-black rounded shadow"
+            />
           </div>
           <label class="font-bold text-[18px]">主題</label>
           <div v-for="(v, name) in items" :key="v" class="mt-1">
@@ -168,6 +193,7 @@ const router = useRouter()
 // 股票資料
 const data = ref()
 const designatedStock = ref('AAPL')
+const buttons = ref()
 
 // 新聞資料
 const news = ref()
@@ -204,13 +230,15 @@ const checkStockToNews = computed(() => {
 // 日期搜尋新聞
 const timeStart = ref('')
 const timeEnd = ref('')
-const timeStartStr = computed(()=>{
-  timeStart.value= timeStart.value?timeStart.value.replace(/-/g, '') + 'T0000':''
+const timeStartStr = computed(() => {
+  timeStart.value = timeStart.value
+    ? timeStart.value.replace(/-/g, '') + 'T0000'
+    : ''
   return timeStart.value
 })
 
-const timeEndStr = computed(()=>{
-  timeEnd.value= timeEnd.value?timeEnd.value.replace(/-/g, '') + 'T2359':''
+const timeEndStr = computed(() => {
+  timeEnd.value = timeEnd.value ? timeEnd.value.replace(/-/g, '') + 'T2359' : ''
   return timeEnd.value
 })
 
@@ -247,10 +275,17 @@ const searchApi = computed(() => {
   return `https://financialmodelingprep.com/api/v3/search?query=${searchStock.value}&limit=10&exchange=NASDAQ&apikey=${fmp}`
 })
 
+const buttonApi = `https://financialmodelingprep.com/api/v3/quote-order/AAPL,GOOGL,META,TSLA?apikey=${fmp}`
+
 // 取得資料
 const getData = (stock = 'AAPL') => {
   axios
-    .get(dataApi)
+    .get(buttonApi)
+    .then((res) => {
+      console.log(res.data)
+      buttons.value = res.data
+      return axios.get(dataApi)
+    })
     .then((res) => {
       data.value = Object.entries(res.data['Time Series (1min)']).map(
         ([date, values]) => ({ date, ...values })
@@ -340,7 +375,12 @@ const chartOptions = computed(() => {
       inputEnabled: false,
     },
     accessibility: {
-      enabled:false,
+      enabled: false,
+    },
+    stockTools: {
+      gui: {
+        enabled: false, // 啟用 GUI
+      },
     },
     series: [
       {

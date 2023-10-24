@@ -57,9 +57,6 @@
           </ClientOnly>
         </div>
         <div class="w-[33%] flex flex-wrap">
-          <!-- <div class="w-[100%] ">
-              <h3 class="rounded-full border border-solid border-[#bebebe] box-border inline-block w-[100px] h-[25px] text-center leading-[25px] font-normal mt-5 mb-3">股票概述</h3>
-          </div> -->
           <div
             v-for="(value, key) in stockData"
             :key="key"
@@ -76,16 +73,21 @@
           </div>
         </div>
       </div>
-      <div v-if="stockChartFix.length !== 0" class="w-[70%] mx-auto mt-3">
+      <div v-if="stockChartFix.length !== 0" class="mx-auto mt-3">
         <ClientOnly>
           <div class="flex items-center">
-            <font-awesome-icon
-              :icon="['fas', 'circle-plus']"
-              size="xl"
-              style="color: #157d7f"
-              @click="searchAdd = !searchAdd"
-              class="mb-2"
-            />
+            <div class="p-1 flex items-center">
+              <font-awesome-icon
+                :icon="['fas', 'circle-plus']"
+                size="xl"
+                style="color: #157d7f"
+                @click="searchAdd = !searchAdd"
+                
+              />
+              <label for="typeahead_add" @click="searchAdd = !searchAdd" class="ms-1 text-[18px] font-bold"
+                >比較股票績效</label
+              >
+            </div>
             <vue3-simple-typeahead
               id="typeahead_add"
               placeholder="搜尋股票..."
@@ -109,13 +111,21 @@
             </vue3-simple-typeahead>
           </div>
           <div class="flex items-center">
-            <font-awesome-icon
-              :icon="['fas', 'circle-minus']"
-              size="xl"
-              style="color: #157d7f"
-              class="inline-block"
-              @click="searchRemove = !searchRemove"
-            />
+            <div class="p-1">
+              <font-awesome-icon
+                :icon="['fas', 'circle-minus']"
+                size="xl"
+                style="color: #157d7f"
+                class="inline-block"
+                @click="searchRemove = !searchRemove"
+              />
+              <label
+                for="typeahead_remove"
+                @click="searchRemove = !searchRemove"
+                class="ms-1 text-[18px] font-bold"
+                >刪減股票績效</label
+              >
+            </div>
             <vue3-simple-typeahead
               id="typeahead_remove"
               placeholder="搜尋股票..."
@@ -141,22 +151,11 @@
         </ClientOnly>
         <ClientOnly>
           <highcharts
-            class="w-[1000px] mx-auto my-10"
+            class="mx-auto mb-10"
             :constructor-type="'stockChart'"
             :options="chartOptionsMulti"
           />
         </ClientOnly>
-        <draggable          
-          :list="arr"
-          group="testtt"
-          itemKey="id"
-          ghost-class="opacity-30"
-        >
-          <template #item="{ element }">
-            <TestCom />
-          </template>
-        </draggable>
-        
       </div>
     </template>
   </NuxtLayout>
@@ -167,12 +166,6 @@ import draggable from 'vuedraggable'
 
 const route = useRoute()
 const id = route.params.id
-
-const arr = [
-  {test:19,id:'1'},
-  {test:29,id:'2'},
-  {test:39,id:'3'},
-]
 
 // key
 const fmp = import.meta.env.VITE_KEY_FMP
@@ -236,7 +229,24 @@ const getData = async () => {
   await Promise.all([getFirstChart, getStockFundamental])
     .then((res) => {
       stockChart.value = res[0].data.historical
-      stockData.value = res[1].data[0]
+      stockData.value = res[1].data.map(
+        ({
+          exchange,
+          description,
+          zip,
+          dcfDiff,
+          dcf,
+          image,
+          defaultImage,
+          isEtf,
+          isActivelyTrading,
+          isAdr,
+          isFund,
+          ipoDate,
+          ...rest
+        }) => rest
+      )
+      stockData.value = stockData.value[0]
       console.log(stockData.value)
     })
     .catch((rej) => {
@@ -478,7 +488,7 @@ const changeChart = async (change) => {
 const chartOptionsMulti = computed(() => {
   return {
     chart: {
-      height: 1000,
+      height: 500,
     },
     // 預設選第五個選擇器(1y)
     rangeSelector: {
@@ -497,6 +507,11 @@ const chartOptionsMulti = computed(() => {
           color: 'silver',
         },
       ],
+    },
+    stockTools: {
+      gui: {
+        enabled: false, // 啟用 GUI
+      },
     },
     // 下方圓點圖例
     legend: {
