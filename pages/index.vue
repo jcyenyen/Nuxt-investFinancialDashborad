@@ -28,27 +28,29 @@
       <div class="box">
         <div
           v-for="v in buttons"
-          class="btn-primary shadows sticky text-center w-[24%] "
+          class="btn-primary shadows sticky text-center w-[24%]"
           @click="getData(v.symbol)"
         >
-          <h3 class="text-[24px] font-bold" @click.self="router.push(`/stocks/${v.symbol}`)">{{ v.name }}</h3>
+          <h3
+            class="text-[24px] font-bold"
+            @click.self="router.push(`/stocks/${v.symbol}`)"
+          >
+            {{ v.name }}
+          </h3>
           <div class="flex items-center justify-center">
-            <p class="font-[600]">{{ v.price }}<span class="text-[12px]">USD</span></p>
-            <p class="ms-3" :class="v.changesPercentage>0?'text-[#56a556]':'text-[#ff0000]'">{{ v.changesPercentage }}%</p>
+            <p class="font-[600]">
+              {{ v.price }}<span class="text-[12px]">USD</span>
+            </p>
+            <p
+              class="ms-3"
+              :class="
+                v.changesPercentage > 0 ? 'text-[#56a556]' : 'text-[#ff0000]'
+              "
+            >
+              {{ v.changesPercentage }}%
+            </p>
           </div>
         </div>
-        <!-- <button class="btn-primary shadow sticky z-10" @click="getData('AAPL')">
-          Apple
-        </button>
-        <button class="btn-primary shadow z-10" @click="getData('GOOGL')">
-          Google
-        </button>
-        <button class="btn-primary shadow z-10" @click="getData('META')">
-          META
-        </button>
-        <button class="btn-primary shadow z-10" @click="getData('TSLA')">
-          Tesla
-        </button> -->
       </div>
       <ClientOnly>
         <highcharts
@@ -58,53 +60,68 @@
           :options="chartOptions"
         />
       </ClientOnly>
-      <div v-if="gainRankingOnTheDay" class="mb-5">
-        <ul>
-          <li>
-            <h3 class="text-center font-bold text-xl">當日上漲股票排名</h3>
-          </li>
+      <div v-if="gainRankingOnTheDay" class="py-20">
+        <h3 class="text-center font-bold text-2xl mb-[20px]">
+          當日上漲股票排名
+        </h3>
+        <ul class="flex flex-wrap justify-around">
           <li
-            v-for="(v, i) in gainRankingOnTheDay"
-            class="shadow-xl mb-6 inline-block racebox"
+            v-for="v in gainRankingOnTheDay"
+            :key="v.name"
+            class="racebox"
           >
-            <h4 class="text-xs text-center">{{ v.name }}</h4>
-            <div class="flex items-end justify-center mt-3 text-[#56a556]">
-              <p class="text-3xl font-bold me-1">{{ v.price }}</p>
-              <p class="text-[#56a556] font-thin">
+            <div>
+              <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
+              <p>{{ v.symbol }}</p>
+            </div>
+            <div class="flex items-center">
+              <p class="font-bold me-5">
+                {{ v.price }}<span class="font-normal text-[10px] ms-1">USD</span>
+              </p>
+              <p class="percent">
                 {{ `+${v.changesPercentage}%` }}
               </p>
             </div>
           </li>
         </ul>
-        <ul>
-          <li>
-            <h3 class="text-center font-bold text-xl">當日下跌股票排名</h3>
-          </li>
+        <h3 class="text-center font-bold text-2xl mb-[20px]">當日下跌股票排名</h3>
+        <ul class="flex flex-wrap justify-around">
           <li
-            v-for="(v, i) in loseRankingOnThatDay"
-            class="presence shadow-xl mb-6"
+            v-for=" v in loseRankingOnThatDay"
+            class="racebox"
           >
-            <h4 class="text-xs text-center">{{ v.name }}</h4>
-            <div class="flex items-end justify-center mt-3 text-[#ff0000]">
-              <p class="text-3xl font-bold me-1">{{ v.price }}</p>
-              <p class="text-[#ff0000] font-thin">
+            <div>
+              <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
+              <p>{{ v.symbol }}</p>
+            </div>
+            <div class="flex items-center">
+              <p class="font-bold me-5">
+                {{ v.price }}<span class="font-normal text-[10px] ms-1">USD</span>
+              </p>
+              <p class="percent bg-[#ff0000]">
                 {{ `${v.changesPercentage}%` }}
               </p>
             </div>
           </li>
         </ul>
-        <ul>
-          <li>
-            <h3 class="text-center font-bold text-xl">當日活躍股票排名</h3>
-          </li>
+        <h3 class="text-center font-bold text-2xl mb-[20px]">當日活躍股票排名</h3>
+        <ul class="flex flex-wrap justify-around">
           <li
-            v-for="(v, i) in activeRankingOnThatDay"
-            class="presence shadow-xl mb-6"
+            v-for="v in activeRankingOnThatDay"
+            :key="v.name"
+            class="racebox"
           >
-            <h4 class="text-xs text-center">{{ v.name }}</h4>
-            <div class="flex items-end justify-center mt-3 text-zinc-700">
-              <p class="text-3xl font-bold me-1">{{ v.price }}</p>
-              <p class="font-thin">{{ `${v.changesPercentage}%` }}</p>
+            <div>
+              <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
+              <p>{{ v.symbol }}</p>
+            </div>
+            <div class="flex items-center">
+              <p class="font-bold me-5">
+                {{ v.price }}<span class="font-normal text-[10px] ms-1">USD</span>
+              </p>
+              <p class="percent bg-zinc-700">
+                <span v-if="v.changesPercentage>0">+</span>{{ `${v.changesPercentage}%` }}
+              </p>
             </div>
           </li>
         </ul>
@@ -161,11 +178,11 @@
             :href="v.url"
             v-for="(v, i) in news"
             :key="i + '12345'"
-            class="inline-block box-border p-5 w-[300px] border border-solid border-black rounded shadow-2xl flex flex-col justify-around my-2"
+            class="inline-block box-border p-5 w-[300px] border border-solid border-black rounded shadow-2xl flex flex-col justify-between my-2"
           >
-            <img :src="v.banner_image" alt="" />
+            <img :src="v.banner_image" class="w-[100%] h-[var(--width)]" alt="" />
             <div>
-              <h3 class="py-1">{{ v.title }}</h3>
+              <h3 class="py-1 text-ellipsis overflow-hidden">{{ v.title }}</h3>
               <p v-for="author in v.authors" class="text-xs">
                 {{ author }}
               </p>
@@ -299,6 +316,7 @@ const getData = (stock = 'AAPL') => {
     })
     .then((res) => {
       presenceStock.value = res
+      console.log(res[0])
       return axios.get(newsApi.value)
     })
     .then((res) => {
@@ -344,7 +362,8 @@ const stockName = ref('')
 const chartOptions = computed(() => {
   return {
     title: {
-      text: stockName.value,
+      useHTML:true,
+      text: `<span class='text-[21px]'>${stockName.value}</span>`,
     },
     xAxis: {
       gapGridLineWidth: 0,
@@ -478,8 +497,26 @@ const chooseNews = () => {
 }
 </script>
 <style lang="scss" scoped>
+.racebox:nth-child(2) {
+  width: 45%;
+}
+.racebox:nth-child(1) {
+  width: 45%;
+}
+.racebox:nth-child(4) {
+  width: 29%;
+}
+.racebox:nth-child(5) {
+  width: 29%;
+}
 .racebox:nth-child(3) {
-  width: 500px;
-  height: 500px;
+  width: 29%;
+}
+
+.highcharts-title {
+    fill: #434348;
+    font-weight: bold;
+    letter-spacing: 0.3em;
+    font-size: 3em;
 }
 </style>

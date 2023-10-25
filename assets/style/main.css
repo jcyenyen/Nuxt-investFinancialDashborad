@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Noto Sans TC";
+  font-weight: 400;
+  src: url("../assets/fonts/Noto_Sans_TC/NotoSansTC-Regular.otf");
+}
+
+@font-face {
+  font-family: "Noto Sans TC";
+  font-weight: 700;
+  src: url("../assets/fonts/Noto_Sans_TC/NotoSansTC-Bold.otf");
+}
+
+HTML,
+body,
+div,
+ul,
+ol,
+dl,
+li,
+dt,
+dd,
+p,
+blockquote,
+pre,
+form,
+fieldset,
+table,
+th,
+td {
+    border: none;
+    font-family: "Noto Sans TC","Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    font-size: 14px;
+    margin: 0px;
+    padding: 0px;
+}
+
+@layer components {
+  .box {
+      @apply w-[100%] mx-auto my-4 p-6 max-[600px]:bg-sky-300 flex 
+  }
+  .btn-primary {
+    @apply rounded bg-white text-[16px] m-4 p-2 hover:shadow 
+  }
+  .nav-a {
+    @apply m-4 p-2  bg-white rounded font-bold text-xl
+  }
+  .shadows {   
+    box-shadow: 3px 5px 0px 0px rgba(181, 181, 181, 0.25);
+    /* box-shadow: 0px 8px 10px -6px rgba(181, 181, 181, 0.25); */
+  }
+  .presence { 
+    @apply w-[220px] h-[80px] rounded my-4 
+  }
+  .racebox {
+    @apply shadow-xl mb-6 inline-block rounded flex justify-between items-center box-border p-3 pb-1 hover:bg-gray-100
+  }
+  .percent {
+    @apply bg-[#56a556] text-white rounded-[10px] font-thin py-2 px-3 box-border tracking-wider
+  }
+}

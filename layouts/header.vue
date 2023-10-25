@@ -1,6 +1,6 @@
 <template>
   <div class="h-[85px] flex items-center justify-between nav">
-    <h1 class="ml-10 text-2xl">Deeping Stock</h1>
+    <h1 class="ml-10 text-[24px]">Deeping Stock</h1>
     <ClientOnly>
       <vue3-simple-typeahead
         id="typeahead_id"
@@ -61,6 +61,6 @@ h1 {
   color: #063a34;
   font-weight: 900;
   // text-shadow: 2px 2px 0px #a2c8c4;
-  text-shadow: 1px 1px 0px #063a34;
+  // text-shadow: 1px 1px 0px #063a34;
 }
 </style>
