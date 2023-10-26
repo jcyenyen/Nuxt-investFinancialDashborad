@@ -28,34 +28,41 @@
       <div class="box">
         <div
           v-for="v in buttons"
-          class="btn-primary shadows sticky text-center w-[24%]"
-          @click="getData(v.symbol)"
+          class="flex items-center btn-primary shadows sticky w-[24%]"
+          @click="getData(v.symbol, v.name)"
         >
-          <h3
-            class="text-[24px] font-bold"
-            @click.self="router.push(`/stocks/${v.symbol}`)"
-          >
-            {{ v.name }}
-          </h3>
-          <div class="flex items-center justify-center">
-            <p class="font-[600]">
-              {{ v.price }}<span class="text-[12px]">USD</span>
-            </p>
-            <p
-              class="ms-3"
-              :class="
-                v.changesPercentage > 0 ? 'text-[#56a556]' : 'text-[#ff0000]'
-              "
+          <img
+            :src="`https://financialmodelingprep.com/image-stock/${v.symbol.toUpperCase()}.png`"
+            class="inline-block w-[15%] h-[45px] aspect-square me-3"
+            :class="v.symbol == 'AAPL' ? 'bg-black p-3 rounded-[50%]' : ''"
+          />
+          <div>
+            <h3
+              class="text-[24px] font-bold"
+              @click.self="router.push(`/stocks/${v.symbol}`)"
             >
-              {{ v.changesPercentage }}%
-            </p>
+              {{ v.name }}
+            </h3>
+            <div class="flex items-center">
+              <p class="font-[600]">
+                {{ v.price }}<span class="text-[12px]">USD</span>
+              </p>
+              <p
+                class="ms-3"
+                :class="
+                  v.changesPercentage > 0 ? 'text-[#56a556]' : 'text-[#ff0000]'
+                "
+              >
+                {{ v.changesPercentage }}%
+              </p>
+            </div>
           </div>
         </div>
       </div>
       <ClientOnly>
         <highcharts
           v-if="realTimeOffer"
-          class="h-[600px] mx-auto my-10"
+          class="h-[600px] w-[90%] mx-auto my-10"
           :constructor-type="'stockChart'"
           :options="chartOptions"
         />
@@ -65,18 +72,15 @@
           當日上漲股票排名
         </h3>
         <ul class="flex flex-wrap justify-around">
-          <li
-            v-for="v in gainRankingOnTheDay"
-            :key="v.name"
-            class="racebox"
-          >
+          <li v-for="v in gainRankingOnTheDay" :key="v.name" class="racebox">
             <div>
               <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
               <p>{{ v.symbol }}</p>
             </div>
             <div class="flex items-center">
               <p class="font-bold me-5">
-                {{ v.price }}<span class="font-normal text-[10px] ms-1">USD</span>
+                {{ v.price
+                }}<span class="font-normal text-[10px] ms-1">USD</span>
               </p>
               <p class="percent">
                 {{ `+${v.changesPercentage}%` }}
@@ -84,19 +88,19 @@
             </div>
           </li>
         </ul>
-        <h3 class="text-center font-bold text-2xl mb-[20px]">當日下跌股票排名</h3>
+        <h3 class="text-center font-bold text-2xl mb-[20px]">
+          當日下跌股票排名
+        </h3>
         <ul class="flex flex-wrap justify-around">
-          <li
-            v-for=" v in loseRankingOnThatDay"
-            class="racebox"
-          >
+          <li v-for="v in loseRankingOnThatDay" class="racebox">
             <div>
               <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
               <p>{{ v.symbol }}</p>
             </div>
             <div class="flex items-center">
               <p class="font-bold me-5">
-                {{ v.price }}<span class="font-normal text-[10px] ms-1">USD</span>
+                {{ v.price
+                }}<span class="font-normal text-[10px] ms-1">USD</span>
               </p>
               <p class="percent bg-[#ff0000]">
                 {{ `${v.changesPercentage}%` }}
@@ -104,29 +108,29 @@
             </div>
           </li>
         </ul>
-        <h3 class="text-center font-bold text-2xl mb-[20px]">當日活躍股票排名</h3>
+        <h3 class="text-center font-bold text-2xl mb-[20px]">
+          當日活躍股票排名
+        </h3>
         <ul class="flex flex-wrap justify-around">
-          <li
-            v-for="v in activeRankingOnThatDay"
-            :key="v.name"
-            class="racebox"
-          >
+          <li v-for="v in activeRankingOnThatDay" :key="v.name" class="racebox">
             <div>
               <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
               <p>{{ v.symbol }}</p>
             </div>
             <div class="flex items-center">
               <p class="font-bold me-5">
-                {{ v.price }}<span class="font-normal text-[10px] ms-1">USD</span>
+                {{ v.price
+                }}<span class="font-normal text-[10px] ms-1">USD</span>
               </p>
               <p class="percent bg-zinc-700">
-                <span v-if="v.changesPercentage>0">+</span>{{ `${v.changesPercentage}%` }}
+                <span v-if="v.changesPercentage > 0">+</span
+                >{{ `${v.changesPercentage}%` }}
               </p>
             </div>
           </li>
         </ul>
       </div>
-      <div class="flex w-[95%] mx-auto">
+      <div class="flex w-[95%] mx-auto mb-[100px]">
         <div
           class="w-[20%] h-[850px] p-5 border border-solid border-black rounded box-border mt-2"
         >
@@ -178,11 +182,17 @@
             :href="v.url"
             v-for="(v, i) in news"
             :key="i + '12345'"
-            class="inline-block box-border p-5 w-[300px] border border-solid border-black rounded shadow-2xl flex flex-col justify-between my-2"
+            class="news"
           >
-            <img :src="v.banner_image" class="w-[100%] h-[var(--width)]" alt="" />
+            <img
+              :src="v.banner_image"
+              class="w-[30%] aspect-square object-contain me-3"
+              alt=""
+            />
             <div>
-              <h3 class="py-1 text-ellipsis overflow-hidden">{{ v.title }}</h3>
+              <h3 class="py-1  text-ellipsis overflow-hidden">
+                {{ v.title }}
+              </h3>
               <p v-for="author in v.authors" class="text-xs">
                 {{ author }}
               </p>
@@ -279,7 +289,7 @@ const alpha = import.meta.env.VITE_KEY_ALPHA
 const fmp = import.meta.env.VITE_KEY_FMP
 
 // API
-const dataApi = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${designatedStock.value}&interval=1min&outputsize=full&apikey=${alpha}`
+const dataApi =computed(()=>{return `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${designatedStock.value}&interval=1min&outputsize=full&apikey=${alpha}`})
 const newsApi = computed(
   () =>
     `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&topics=${checkedNewsString.value}${checkStockToNews.value}&time_from=${timeStartStr.value}&time_to=${timeEndStr.value}&apikey=${alpha}`
@@ -295,19 +305,22 @@ const searchApi = computed(() => {
 const buttonApi = `https://financialmodelingprep.com/api/v3/quote-order/AAPL,GOOGL,META,TSLA?apikey=${fmp}`
 
 // 取得資料
-const getData = (stock = 'AAPL') => {
+const getData = (stock = 'AAPL', company='Apple Inc.') => {
+  // 按鈕更換股票
+  designatedStock.value=stock
   axios
     .get(buttonApi)
     .then((res) => {
       console.log(res.data)
       buttons.value = res.data
-      return axios.get(dataApi)
+      return axios.get(dataApi.value)
     })
     .then((res) => {
       data.value = Object.entries(res.data['Time Series (1min)']).map(
         ([date, values]) => ({ date, ...values })
       )
-      stockName.value = stock
+      console.log(res)
+      stockName.value = company
       return Promise.all([
         axios.get(gainersStockApi),
         axios.get(losersStockApi),
@@ -326,6 +339,7 @@ const getData = (stock = 'AAPL') => {
     .catch((err) => {
       console.log(err)
     })
+    console.log(stock)
 }
 
 onMounted(() => {
@@ -362,18 +376,50 @@ const stockName = ref('')
 const chartOptions = computed(() => {
   return {
     title: {
-      useHTML:true,
+      useHTML: true,
       text: `<span class='text-[21px]'>${stockName.value}</span>`,
     },
     xAxis: {
       gapGridLineWidth: 0,
     },
     yAxis: {
-      // floor: 4300,
-      // ceiling: 4500
+      gridLineColor:'#ffffff',
+    },
+    navigator:{
+      enabled:false
     },
     rangeSelector: {
+      buttonTheme: { // styles for the buttons
+                fill: 'none',
+                stroke: 'none',
+                strokeWidth: 0,
+                r: 3,
+                width: 50,  // 设置按钮的宽度
+                height: 30, // 设置按钮的高度
+                style: {
+                    color: '#284a6b',
+                    fontWeight: 'bold',
+                    lineWidth:5,
+                    fontSize:'16px'
+                },
+                states: {
+                    hover: {
+                    },
+                    select: {
+                        fill: '#284a6b',
+                        style: {
+                            color: 'white',
+                        }
+                    }
+                // disabled: { ... }
+                }
+              },
       buttons: [
+        {
+          type: 'minute',
+          count: 5,
+          text: '5分',
+        },
         {
           type: 'hour',
           count: 1,
@@ -385,12 +431,25 @@ const chartOptions = computed(() => {
           text: '1天',
         },
         {
+          type: 'week',
+          count: 1,
+          text: '1週',
+        },
+        {
           type: 'all',
           count: 1,
           text: '全部',
         },
       ],
-      selected: 1,
+      buttonPosition:{
+          align:'left',
+          x:-15,
+          y:-45
+        },
+      labelStyle: {
+                color: 'white'
+            },
+      selected: 2,
       inputEnabled: false,
     },
     accessibility: {
@@ -398,15 +457,16 @@ const chartOptions = computed(() => {
     },
     stockTools: {
       gui: {
-        enabled: false, // 啟用 GUI
+        enabled: false, // 關閉 GUI
       },
     },
     series: [
       {
-        name: 'test',
+        name: `${stockName.value}`,
         type: 'area',
         data: realTimeOffer.value,
         color: colorsOfUpsAndDowns.value ? '#ff0000' : '#56a556',
+        lineWidth:2,
         // colorByPoint: true,         // 是否要用colors設定數據點顏色
         // colors: ["pink", "gray"],
         gapSize: 5,
@@ -424,7 +484,7 @@ const chartOptions = computed(() => {
             y2: 1,
           },
           stops: [
-            [0, colorsOfUpsAndDowns.value ? '#ff0000' : '#56a556'],
+            [0, colorsOfUpsAndDowns.value ? '#ff000044' : '#56a55644'],
             [
               1,
               charts
@@ -514,9 +574,9 @@ const chooseNews = () => {
 }
 
 .highcharts-title {
-    fill: #434348;
-    font-weight: bold;
-    letter-spacing: 0.3em;
-    font-size: 3em;
+  fill: #284a6b;
+  font-weight: bold;
+  letter-spacing: 0.3em;
+  font-size: 3em;
 }
 </style>
