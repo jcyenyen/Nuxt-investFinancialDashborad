@@ -11,7 +11,6 @@
           />
         </ClientOnly>
       </div>
-      <button @click="test">123</button>
     </template>
   </NuxtLayout>
 </template>
@@ -288,35 +287,8 @@ watchEffect(async () => {
 })
 
 const check = ref(false)
-const test = async () => {
-  console.log(chartData.value)
 
-  check.value = !check.value
-}
 
-const testdata = [
-  {
-    id: '1',
-    name: 'test1',
-    colorValue: 5,
-    parent: 'Technology',
-    value: 100,
-  },
-  {
-    id: '2',
-    name: 'test2',
-    colorValue: 10,
-    parent: 'Technology',
-    value: 200,
-  },
-  {
-    id: '3',
-    name: 'test3',
-    colorValue: 15,
-    parent: 'Technology',
-    value: 300,
-  },
-]
 
 const chartOptions = computed(() => {
   return chartData.value

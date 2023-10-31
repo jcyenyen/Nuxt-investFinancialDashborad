@@ -1,6 +1,6 @@
 <template>
   <div class="h-[85px] flex items-center justify-between nav">
-    <h1 class="ml-10 text-[24px]">Deeping Stock</h1>
+    <h1 class="ml-10 text-[28px]">Deeping Stock</h1>
     <ClientOnly>
       <vue3-simple-typeahead
         id="typeahead_id"
@@ -21,9 +21,9 @@
       </vue3-simple-typeahead>
     </ClientOnly>
     <div>
-      <RouterLink to="/" class="nav-a shadow">首頁</RouterLink>
-      <RouterLink to="/stockFilter" class="nav-a shadow">股票篩選</RouterLink>
-      <RouterLink to="/hotMap" class="nav-a shadow">股票熱區地圖</RouterLink>
+      <RouterLink to="/" class="nav-a shadow focus:bg-[#063a34] focus:text-white">首頁</RouterLink>
+      <RouterLink to="/stockFilter" class="nav-a shadow focus:bg-[#063a34] focus:text-white">股票篩選</RouterLink>
+      <RouterLink to="/hotMap" class="nav-a shadow focus:bg-[#063a34] focus:text-white">股票熱區地圖</RouterLink>
     </div>
   </div>
   <slot name="main" />

@@ -180,8 +180,8 @@
         >
           <a
             :href="v.url"
-            v-for="(v, i) in news"
-            :key="i + '12345'"
+            v-for="v in news"
+            :key="v.overall_sentiment_score"
             class="news"
           >
             <img

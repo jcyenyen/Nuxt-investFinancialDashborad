@@ -36,6 +36,7 @@ td {
     font-size: 14px;
     margin: 0px;
     padding: 0px;
+    letter-spacing: 0.5px;
 }
 
 @layer components {
@@ -63,5 +64,8 @@ td {
   }
   .news {
     @apply inline-block box-border p-5 w-[500px] h-[170px] border border-solid border-black rounded shadow-2xl flex justify-start items-center my-2
+  }
+  .filter_select {
+    @apply border border-solid border-[#bebebe] rounded ms-2 w-[250px] h-[35px] my-1 shadows
   }
 }
