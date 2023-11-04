@@ -608,6 +608,6 @@ const translateKey = (key) => {
 </script>
 <style lang="scss" scoped>
 .stockborder {
-  border-top: 1px solid #b61f1f;
+  border-top: 1px solid black;
 }
 </style>
