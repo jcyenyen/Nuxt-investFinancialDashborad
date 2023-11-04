@@ -123,11 +123,7 @@
         </div>
       </div>
       <div class="w-[90%] mx-auto">
-        <el-table
-          :data="stockResult"
-          style="width: 100%"
-          class=""
-        >
+        <el-table :data="stockResult" style="width: 100%" class="">
           <el-table-column prop="symbol" label="股票代號" mid-width="100">
             <template #default="scope">
               <nuxt-link
@@ -146,8 +142,7 @@
           <el-table-column prop="industry" label="行業" width="200" />
           <el-table-column prop="marketCap" label="市值" width="100">
             <template #default="scope">
-              <p
-              >
+              <p>
                 {{ numberTranslate(scope.row.marketCap) }}
               </p>
             </template>
@@ -162,7 +157,8 @@
                     : 'text-[#56a556]'
                 "
               >
-                {{ scope.row.price }}<span class="text-[#606266] font-normal text-[8px]">USD</span>
+                {{ twoAfterDecimal(scope.row.price)
+                }}<span class="text-[#606266] font-normal text-[8px]">USD</span>
               </p>
             </template>
           </el-table-column>
@@ -172,17 +168,19 @@
                 v-if="scope.row.changesPercentage < 0"
                 class="font-bold text-[#ff0000]"
               >
+                {{ twoAfterDecimal(scope.row.changesPercentage) }}%
+              </p>
+              <p v-else-if="scope.row.changesPercentage === 0" class="font-bold">
                 {{ scope.row.changesPercentage }}%
               </p>
               <p v-else class="font-bold text-[#56a556]">
-                +{{ scope.row.changesPercentage }}%
+                +{{ twoAfterDecimal(scope.row.changesPercentage) }}%
               </p>
             </template>
           </el-table-column>
           <el-table-column prop="volume" label="當日交易量">
             <template #default="scope">
-              <p
-              >
+              <p>
                 {{ numberTranslate(scope.row.volume) }}
               </p>
             </template>
@@ -192,6 +190,7 @@
           <el-pagination
             layout="total, sizes, prev, pager, next, jumper"
             :current-page="page"
+            :page-count="total"
             :page-size="pageSize"
             :page-sizes="[10, 30, 50, 100]"
             :total="total"
@@ -376,7 +375,7 @@ const priceOption = ref([
 
 const stockApi = computed(
   () =>
-    `https://financialmodelingprep.com/api/v3/stock-screener?marketCapMoreThan=${marketCapMore.value}&marketCapLowerThan=${marketCapLower.value}&volumeMoreThan=${volumeMore.value}&volumeLowerThan=${volumeLower.value}&sector=${sector.value}&industry=${industry.value}&dividendMoreThan=${dividendMore.value}&dividendLowerThan=${dividendLower.value}&betaMoreThan=${betaMore.value}&betaLowerThan=${betaLower.value}&priceMoreThan=${priceMore.value}&priceLowerThan=${priceLower.value}&limit=500&apikey=${fmp}`
+    `https://financialmodelingprep.com/api/v3/stock-screener?marketCapMoreThan=${marketCapMore.value}&marketCapLowerThan=${marketCapLower.value}&volumeMoreThan=${volumeMore.value}&volumeLowerThan=${volumeLower.value}&sector=${sector.value}&industry=${industry.value}&dividendMoreThan=${dividendMore.value}&dividendLowerThan=${dividendLower.value}&betaMoreThan=${betaMore.value}&betaLowerThan=${betaLower.value}&priceMoreThan=${priceMore.value}&priceLowerThan=${priceLower.value}&limit=&apikey=${fmp}`
 )
 
 // 產業的option
@@ -395,12 +394,23 @@ const industryApi = `https://financialmodelingprep.com/api/v4/industry_price_ear
 
 const stockData = ref([])
 
+// 頁籤
+
+const page = ref(1)
+const total = ref()
+const pageSize = ref(30)
+
+
 const getData = async () => {
   await axios
     .get(stockApi.value)
     .then((res) => {
       console.log(res.data)
+      // split
       stockData.value = res.data
+      total.value =Math.ceil(stockData.value.length/pageSize.value )
+      console.log(total.value)
+      // 資料傳一次就好 動頁籤篩選後面動
     })
     .catch((rej) => {
       console.log(rej)
@@ -441,6 +451,7 @@ const stockName = computed(() => {
   return data
 })
 
+
 // 含漲跌幅的股票
 const stockByChangeApi = computed(() => {
   return `https://financialmodelingprep.com/api/v3/quote/${stockName.value}?apikey=${fmp}`
@@ -476,25 +487,36 @@ const stockResult = computed(() => {
         return v
       })
     : undefined
-  return data
+  let dataSlice = data
+  dataSlice =dataSlice? dataSlice.slice((page.value-1)*pageSize.value,page.value*pageSize.value):undefined
+  return dataSlice
 })
 
-const numberTranslate = (num)=> {
+// 數據加上 百萬或 兆的單位
+const numberTranslate = (num) => {
   num = num.toString()
-  if(num.length>=10){
-    const integer = num.slice(0,num.length-9)
-    const decimal = num.slice(num.length-9,num.length-7)
+  const length = num.length
+  if (length > 9) {
+    const integer = num.slice(0, length - 9)
+    const decimal = num.slice(length - 9, length - 7)
     num = `${integer}.${decimal}B`
-  }else if(num.length>=7){
-    const integer = num.slice(0,num.length-6)
-    const decimal = num.slice(num.length-6,num.length-4)
+  } else if (length >6) {
+    const integer = num.slice(0, length - 6)
+    const decimal = num.slice(length - 6, length - 4)
     num = `${integer}.${decimal}M`
-  }else if(num.length>=4 && num.length<=6){
-    console.log(num)
-    const integer1 = num.slice(0,num.length-3)
-    const integer2 = num.slice(num.length-3,num.length)
+  } else if (length >3) {
+    const integer1 = num.slice(0, length - 3)
+    const integer2 = num.slice(length - 3, length)
     num = `${integer1},${integer2}`
   }
+  return num
+}
+
+
+// 取到小數後兩位
+
+const twoAfterDecimal = (num) =>{
+  num = Math.round(num*100)/100
   return num
 }
 
@@ -502,11 +524,7 @@ const test = async (event) => {
   console.log(event)
 }
 
-// 頁籤
 
-const page = ref(1)
-const total = ref(0)
-const pageSize = ref(10)
 
 // 分頁
 const handleSizeChange = (val) => {
@@ -522,7 +540,7 @@ const handleCurrentChange = (val) => {
 </script>
 <style lang="scss" scoped>
 .box1 {
-  background-color: #4073a6;
+  background-color: #ffffff;
 }
 :deep(.el-table th) {
   background: #d3d3d3;

@@ -1,7 +1,7 @@
 <template>
   <NuxtLayout name="header">
     <template #main>
-      <!-- <div>
+      <div>
         <ClientOnly>
           <vue3-simple-typeahead
             id="typeahead_id"
@@ -24,7 +24,7 @@
             </template>
           </vue3-simple-typeahead>
         </ClientOnly>
-      </div> -->
+      </div>
       <div class="box">
         <div
           v-for="v in buttons"
@@ -53,7 +53,7 @@
                   v.changesPercentage > 0 ? 'text-[#56a556]' : 'text-[#ff0000]'
                 "
               >
-                {{ v.changesPercentage }}%
+                {{ v.changesPercentage > 0?`+${twoAfterDecimal(v.changesPercentage)}`:`${twoAfterDecimal(v.changesPercentage)}` }}%
               </p>
             </div>
           </div>
@@ -83,7 +83,7 @@
                 }}<span class="font-normal text-[10px] ms-1">USD</span>
               </p>
               <p class="percent">
-                {{ `+${v.changesPercentage}%` }}
+                {{ `+${twoAfterDecimal(v.changesPercentage)}%` }}
               </p>
             </div>
           </li>
@@ -103,7 +103,7 @@
                 }}<span class="font-normal text-[10px] ms-1">USD</span>
               </p>
               <p class="percent bg-[#ff0000]">
-                {{ `${v.changesPercentage}%` }}
+                {{ `${twoAfterDecimal(v.changesPercentage)}%` }}
               </p>
             </div>
           </li>
@@ -124,7 +124,7 @@
               </p>
               <p class="percent bg-zinc-700">
                 <span v-if="v.changesPercentage > 0">+</span
-                >{{ `${v.changesPercentage}%` }}
+                >{{ `${twoAfterDecimal(v.changesPercentage)}%` }}
               </p>
             </div>
           </li>
@@ -352,10 +352,7 @@ console.log(test)
 const realTimeOffer = computed(() => {
   return data.value
     ? data.value.reverse().map((v, i) => {
-        const dateTimeString = v.date // 日期
-        let milliseconds // 換算後的時間
-        const dateObject = new Date(dateTimeString)
-        milliseconds = dateObject.getTime()
+        const milliseconds = +new Date(v.date) // 換算後的時間
         return [milliseconds, parseFloat(v['2. high'])]
       })
     : undefined
@@ -555,6 +552,14 @@ const chooseNews = () => {
       console.log(err)
     })
 }
+
+// 取到小數後兩位
+
+const twoAfterDecimal = (num) =>{
+  num = Math.round(num*100)/100
+  return num
+}
+
 </script>
 <style lang="scss" scoped>
 .racebox:nth-child(2) {
