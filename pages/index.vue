@@ -53,7 +53,11 @@
                   v.changesPercentage > 0 ? 'text-[#56a556]' : 'text-[#ff0000]'
                 "
               >
-                {{ v.changesPercentage > 0?`+${twoAfterDecimal(v.changesPercentage)}`:`${twoAfterDecimal(v.changesPercentage)}` }}%
+                {{
+                  v.changesPercentage > 0
+                    ? `+${twoAfterDecimal(v.changesPercentage)}`
+                    : `${twoAfterDecimal(v.changesPercentage)}`
+                }}%
               </p>
             </div>
           </div>
@@ -73,16 +77,24 @@
         </h3>
         <ul class="flex flex-wrap justify-around">
           <li v-for="v in gainRankingOnTheDay" :key="v.name" class="racebox">
-            <div>
-              <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
-              <p>{{ v.symbol }}</p>
+            <div class="flex items-center">
+                <img
+                  :src="`https://financialmodelingprep.com/image-stock/${v.symbol}.png`"
+                  class="inline-block w-[35px] h-[35px] aspect-square me-2"
+                  :class="v.name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''"
+                  @error="onError"
+                />
+              <div>
+                <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
+                <p>{{ v.symbol }}</p>
+              </div>
             </div>
             <div class="flex items-center">
               <p class="font-bold me-5">
-                {{ v.price
+                {{ `${twoAfterDecimal(v.price)}`
                 }}<span class="font-normal text-[10px] ms-1">USD</span>
               </p>
-              <p class="percent">
+              <p class="percent w-[80px] text-center">
                 {{ `+${twoAfterDecimal(v.changesPercentage)}%` }}
               </p>
             </div>
@@ -190,7 +202,7 @@
               alt=""
             />
             <div>
-              <h3 class="py-1  text-ellipsis overflow-hidden">
+              <h3 class="py-1 text-ellipsis overflow-hidden">
                 {{ v.title }}
               </h3>
               <p v-for="author in v.authors" class="text-xs">
@@ -289,7 +301,9 @@ const alpha = import.meta.env.VITE_KEY_ALPHA
 const fmp = import.meta.env.VITE_KEY_FMP
 
 // API
-const dataApi =computed(()=>{return `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${designatedStock.value}&interval=1min&outputsize=full&apikey=${alpha}`})
+const dataApi = computed(() => {
+  return `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${designatedStock.value}&interval=1min&outputsize=full&apikey=${alpha}`
+})
 const newsApi = computed(
   () =>
     `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&topics=${checkedNewsString.value}${checkStockToNews.value}&time_from=${timeStartStr.value}&time_to=${timeEndStr.value}&apikey=${alpha}`
@@ -305,9 +319,9 @@ const searchApi = computed(() => {
 const buttonApi = `https://financialmodelingprep.com/api/v3/quote-order/AAPL,GOOGL,META,TSLA?apikey=${fmp}`
 
 // 取得資料
-const getData = (stock = 'AAPL', company='Apple Inc.') => {
+const getData = (stock = 'AAPL', company = 'Apple Inc.') => {
   // 按鈕更換股票
-  designatedStock.value=stock
+  designatedStock.value = stock
   axios
     .get(buttonApi)
     .then((res) => {
@@ -339,7 +353,7 @@ const getData = (stock = 'AAPL', company='Apple Inc.') => {
     .catch((err) => {
       console.log(err)
     })
-    console.log(stock)
+  console.log(stock)
 }
 
 onMounted(() => {
@@ -380,37 +394,37 @@ const chartOptions = computed(() => {
       gapGridLineWidth: 0,
     },
     yAxis: {
-      gridLineColor:'#ffffff',
+      gridLineColor: '#ffffff',
     },
-    navigator:{
-      enabled:false
+    navigator: {
+      enabled: false,
     },
     rangeSelector: {
-      buttonTheme: { // styles for the buttons
-                fill: 'none',
-                stroke: 'none',
-                strokeWidth: 0,
-                r: 3,
-                width: 50,  // 设置按钮的宽度
-                height: 30, // 设置按钮的高度
-                style: {
-                    color: '#284a6b',
-                    fontWeight: 'bold',
-                    lineWidth:5,
-                    fontSize:'16px'
-                },
-                states: {
-                    hover: {
-                    },
-                    select: {
-                        fill: '#284a6b',
-                        style: {
-                            color: 'white',
-                        }
-                    }
-                // disabled: { ... }
-                }
-              },
+      buttonTheme: {
+        // styles for the buttons
+        fill: 'none',
+        stroke: 'none',
+        strokeWidth: 0,
+        r: 3,
+        width: 50, // 设置按钮的宽度
+        height: 30, // 设置按钮的高度
+        style: {
+          color: '#284a6b',
+          fontWeight: 'bold',
+          lineWidth: 5,
+          fontSize: '16px',
+        },
+        states: {
+          hover: {},
+          select: {
+            fill: '#284a6b',
+            style: {
+              color: 'white',
+            },
+          },
+          // disabled: { ... }
+        },
+      },
       buttons: [
         {
           type: 'minute',
@@ -438,14 +452,14 @@ const chartOptions = computed(() => {
           text: '全部',
         },
       ],
-      buttonPosition:{
-          align:'left',
-          x:-15,
-          y:-45
-        },
+      buttonPosition: {
+        align: 'left',
+        x: -15,
+        y: -45,
+      },
       labelStyle: {
-                color: 'white'
-            },
+        color: 'white',
+      },
       selected: 2,
       inputEnabled: false,
     },
@@ -463,7 +477,7 @@ const chartOptions = computed(() => {
         type: 'area',
         data: realTimeOffer.value,
         color: colorsOfUpsAndDowns.value ? '#ff0000' : '#56a556',
-        lineWidth:2,
+        lineWidth: 2,
         // colorByPoint: true,         // 是否要用colors設定數據點顏色
         // colors: ["pink", "gray"],
         gapSize: 5,
@@ -555,11 +569,18 @@ const chooseNews = () => {
 
 // 取到小數後兩位
 
-const twoAfterDecimal = (num) =>{
-  num = Math.round(num*100)/100
+const twoAfterDecimal = (num) => {
+  num = Math.round(num * 100) / 100
   return num
 }
 
+// 死圖
+
+const onError = (event) => {
+  // 當圖片加載失敗時，可以把 src 設為空或者預設的佔位圖片
+  // event.target.style.display = 'none';
+  event.target.src = '/FTNT.png'
+}
 </script>
 <style lang="scss" scoped>
 .racebox:nth-child(2) {

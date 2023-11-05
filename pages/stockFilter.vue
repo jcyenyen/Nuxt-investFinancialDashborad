@@ -4,12 +4,7 @@
       <div class="w-[100%] mx-auto mt-5 mb-10 py-10 flex flex-wrap">
         <div class="my-1 w-[24%] flex justify-end items-center">
           <label for="marketCap" class="font-bold text-[16px]">市值</label>
-          <select
-            class="filter_select"
-            id="marketCap"
-            v-model="marketCap"
-            @change="getData"
-          >
+          <select id="marketCap" v-model="marketCap" @change="getData">
             <option value="" key="none" label="請選擇" />
             <option
               v-for="(v, i) in marketCapOption"
@@ -21,12 +16,7 @@
         </div>
         <div class="my-1 w-[24%] flex justify-end items-center">
           <label for="volume" class="font-bold text-[16px]">目前成交量</label>
-          <select
-            class="filter_select"
-            id="volume"
-            v-model="volume"
-            @change="getData"
-          >
+          <select id="volume" v-model="volume" @change="getData">
             <option value="" key="none" label="請選擇" />
             <option
               v-for="(v, i) in volumeOption"
@@ -38,12 +28,7 @@
         </div>
         <div class="my-1 w-[24%] flex justify-end items-center">
           <label for="sector" class="font-bold text-[16px]">產業</label>
-          <select
-            class="filter_select"
-            id="sector"
-            v-model="sector"
-            @change="getData"
-          >
+          <select id="sector" v-model="sector" @change="getData">
             <option value="" key="none" label="請選擇" />
             <option
               v-for="v in sectorOption"
@@ -55,12 +40,7 @@
         </div>
         <div class="my-1 w-[24%] flex justify-end items-center">
           <label for="industry" class="font-bold text-[16px]">行業</label>
-          <select
-            class="filter_select"
-            id="industry"
-            v-model="industry"
-            @change="getData"
-          >
+          <select id="industry" v-model="industry" @change="getData">
             <option value="" key="none" label="請選擇" />
             <option
               v-for="(v, i) in industryOption"
@@ -72,12 +52,7 @@
         </div>
         <div class="my-1 w-[24%] flex justify-end items-center">
           <label for="beta" class="font-bold text-[16px]">Beta值</label>
-          <select
-            class="filter_select"
-            id="beta"
-            v-model="beta"
-            @change="getData"
-          >
+          <select id="beta" v-model="beta" @change="getData">
             <option value="" key="none" label="請選擇" />
             <option
               v-for="(v, i) in betaOption"
@@ -89,12 +64,7 @@
         </div>
         <div class="my-1 w-[24%] flex justify-end items-center">
           <label for="dividend" class="font-bold text-[16px]">股息</label>
-          <select
-            class="filter_select"
-            id="dividend"
-            v-model="dividend"
-            @change="getData"
-          >
+          <select id="dividend" v-model="dividend" @change="getData">
             <option value="" key="none" label="請選擇" />
             <option
               v-for="(v, i) in dividendOption"
@@ -106,12 +76,7 @@
         </div>
         <div class="my-1 w-[24%] flex justify-end items-center">
           <label for="dividend" class="font-bold text-[16px]">股價</label>
-          <select
-            class="filter_select"
-            id="price"
-            v-model="price"
-            @change="getData"
-          >
+          <select id="price" v-model="price" @change="getData">
             <option value="" key="none" label="請選擇" />
             <option
               v-for="(v, i) in priceOption"
@@ -126,11 +91,23 @@
         <el-table :data="stockResult" style="width: 100%" class="">
           <el-table-column prop="symbol" label="股票代號" mid-width="100">
             <template #default="scope">
-              <nuxt-link
-                :to="`/stocks/${scope.row.symbol}`"
-                class="text-cyan-500"
-                >{{ scope.row.symbol }}</nuxt-link
-              >
+              <div class="flex items-center">
+                <img
+                  :key="`${scope.row.symbol}`"
+                  :src="`https://financialmodelingprep.com/image-stock/${scope.row.symbol}.png`"
+                  class="inline-block w-[20px] h-[20px] aspect-square me-3"
+                  :class="
+                    scope.row.symbol == 'AAPL'
+                      ? 'bg-black p-1 rounded-[50%]'
+                      : ''
+                  "
+                />
+                <nuxt-link
+                  :to="`/stocks/${scope.row.symbol}`"
+                  class="text-cyan-500"
+                  >{{ scope.row.symbol }}</nuxt-link
+                >
+              </div>
             </template>
           </el-table-column>
           <el-table-column prop="companyName" label="公司名稱" width="200">
@@ -170,7 +147,10 @@
               >
                 {{ twoAfterDecimal(scope.row.changesPercentage) }}%
               </p>
-              <p v-else-if="scope.row.changesPercentage === 0" class="font-bold">
+              <p
+                v-else-if="scope.row.changesPercentage === 0"
+                class="font-bold"
+              >
                 {{ scope.row.changesPercentage }}%
               </p>
               <p v-else class="font-bold text-[#56a556]">
@@ -400,7 +380,6 @@ const page = ref(1)
 const total = ref()
 const pageSize = ref(30)
 
-
 const getData = async () => {
   await axios
     .get(stockApi.value)
@@ -408,7 +387,7 @@ const getData = async () => {
       console.log(res.data)
       // split
       stockData.value = res.data
-      total.value =Math.ceil(stockData.value.length/pageSize.value )
+      total.value = Math.ceil(stockData.value.length / pageSize.value)
       console.log(total.value)
       // 資料傳一次就好 動頁籤篩選後面動
     })
@@ -451,7 +430,6 @@ const stockName = computed(() => {
   return data
 })
 
-
 // 含漲跌幅的股票
 const stockByChangeApi = computed(() => {
   return `https://financialmodelingprep.com/api/v3/quote/${stockName.value}?apikey=${fmp}`
@@ -488,7 +466,12 @@ const stockResult = computed(() => {
       })
     : undefined
   let dataSlice = data
-  dataSlice =dataSlice? dataSlice.slice((page.value-1)*pageSize.value,page.value*pageSize.value):undefined
+  dataSlice = dataSlice
+    ? dataSlice.slice(
+        (page.value - 1) * pageSize.value,
+        page.value * pageSize.value
+      )
+    : undefined
   return dataSlice
 })
 
@@ -500,11 +483,11 @@ const numberTranslate = (num) => {
     const integer = num.slice(0, length - 9)
     const decimal = num.slice(length - 9, length - 7)
     num = `${integer}.${decimal}B`
-  } else if (length >6) {
+  } else if (length > 6) {
     const integer = num.slice(0, length - 6)
     const decimal = num.slice(length - 6, length - 4)
     num = `${integer}.${decimal}M`
-  } else if (length >3) {
+  } else if (length > 3) {
     const integer1 = num.slice(0, length - 3)
     const integer2 = num.slice(length - 3, length)
     num = `${integer1},${integer2}`
@@ -512,19 +495,16 @@ const numberTranslate = (num) => {
   return num
 }
 
-
 // 取到小數後兩位
 
-const twoAfterDecimal = (num) =>{
-  num = Math.round(num*100)/100
+const twoAfterDecimal = (num) => {
+  num = Math.round(num * 100) / 100
   return num
 }
 
 const test = async (event) => {
   console.log(event)
 }
-
-
 
 // 分頁
 const handleSizeChange = (val) => {

@@ -51,9 +51,9 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 /* import specific icons */
-import { faUserSecret,faCirclePlus,faCircleMinus } from '@fortawesome/free-solid-svg-icons'
+import { faUserSecret,faCirclePlus,faCircleMinus,faMinus} from '@fortawesome/free-solid-svg-icons'
 
-
+import { faSquareMinus,faSquarePlus } from '@fortawesome/free-regular-svg-icons'
 
 // import 'vue3-simple-typeahead/dist/vue3-simple-typeahead.css'; 
 
@@ -95,7 +95,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   exporting(Highcharts)
 
   /* add icons to the library */
-  library.add(faUserSecret,faCirclePlus,faCircleMinus)
+  library.add(faUserSecret,faCirclePlus,faCircleMinus,faMinus,faSquareMinus, faSquarePlus)
 
   // 這裡就是你提到的 use
   nuxtApp.vueApp

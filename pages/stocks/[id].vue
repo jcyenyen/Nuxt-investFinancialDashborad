@@ -6,11 +6,11 @@
         class="w-[95%] mt-3 mx-auto flex justify-between"
       >
         <div class="w-[65%] h-[50%] rounded">
-          <div class="flex w-[90%] mx-auto mt-4">
-            <div class="my-1 w-[50%]">
-              <label for="overlays" class="font-bold">覆蓋指標:</label>
+          <div class="flex justify-between w-[95%] mx-auto mt-4">
+            <div class="my-1 w-[47%]">
+              <label for="overlays" class="font-bold">覆蓋指標</label>
               <select
-                class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[70%]"
+                class="border border-solid border-[#bebebe] rounded ms-2 w-[84%]"
                 id="overlays"
                 @change="overlaysChoose"
               >
@@ -27,10 +27,10 @@
                 </option>
               </select>
             </div>
-            <div class="my-1 w-[50%]">
-              <label for="oscillators" class="font-bold">振蕩指標:</label>
+            <div class="my-1 w-[47%]">
+              <label for="oscillators" class="font-bold">振蕩指標</label>
               <select
-                class="border border-solid border-[#bebebe] rounded shadow ms-2 w-[80%]"
+                class="border border-solid border-[#bebebe] rounded ms-2 w-[84%]"
                 id="oscillators"
                 @change="OscillatorChoose"
               >
@@ -67,91 +67,129 @@
             >
               {{ translateKey(key) }}
             </div>
-            <div class="flex items-start font-normal text-xs min-h-[60px]">
+            <div class="flex items-start font-normal text-xs min-h-[60px] max-w-[90px] break-all ">
               {{ value }}
             </div>
           </div>
         </div>
       </div>
-      <div v-if="stockChartFix.length !== 0" class="mx-auto mt-3">
+      <div
+        v-if="stockChartFix.length !== 0"
+        class="w-[95%] mx-auto mt-3 flex items-start justify-between"
+      >
         <ClientOnly>
-          <div class="flex items-center">
-            <div class="p-1 flex items-center">
-              <font-awesome-icon
-                :icon="['fas', 'circle-plus']"
-                size="xl"
-                style="color: #157d7f"
-                @click="searchAdd = !searchAdd"
-                
-              />
-              <label for="typeahead_add" @click="searchAdd = !searchAdd" class="ms-1 text-[18px] font-bold"
-                >比較股票績效</label
+          <div
+            class="w-[27%] border-0 border-y border-solid py-3 "
+          >
+            <div class="flex items-center">
+              <div class="p-1 flex items-center h-[70px] w-[43%] cursor-pointer">
+                <font-awesome-icon
+                  :icon="['far', 'square-plus']"
+                  size="2xl"
+                  fade
+                  style="color: black"
+                  class="mx-2"
+                  @click="searchAdd = !searchAdd"
+                />
+                <label
+                  for="typeahead_add"
+                  @click="searchAdd = !searchAdd"
+                  class="ms-1 text-[18px] w-[80%] font-bold cursor-pointer"
+                  >股票績效比較</label
+                >
+              </div>
+              <vue3-simple-typeahead
+                id="typeahead_add"
+                placeholder="搜尋股票..."
+                v-if="searchAdd"
+                class="w-[98%] m-4 p-1 bg-white rounded shadow :active:border-white"
+                :items="checkData"
+                :minInputLength="1"
+                v-model="searchAddStock"
+                @onInput="onInputEventHandler"
+                @keydown.native.enter="changeChart('add')"
+                @selectItem="selecAddtItem"
               >
+                <template #list-item-text="slot">
+                  <div class="">
+                    <span
+                      class="inline-block w-[300px] bg-white rounded shadow ms-4 mb-1"
+                      v-html="
+                        slot.boldMatchText(slot.itemProjection(slot.item))
+                      "
+                    ></span>
+                  </div>
+                </template>
+              </vue3-simple-typeahead>
             </div>
-            <vue3-simple-typeahead
-              id="typeahead_add"
-              placeholder="搜尋股票..."
-              v-if="searchAdd"
-              class="w-[300px] m-4 p-1 bg-white rounded shadow :active:border-white"
-              :items="checkData"
-              :minInputLength="1"
-              v-model="searchAddStock"
-              @onInput="onInputEventHandler"
-              @keydown.native.enter="changeChart('add')"
-              @selectItem="selecAddtItem"
-            >
-              <template #list-item-text="slot">
-                <div class="">
-                  <span
-                    class="inline-block w-[300px] bg-white rounded shadow ms-4 mb-1"
-                    v-html="slot.boldMatchText(slot.itemProjection(slot.item))"
-                  ></span>
-                </div>
-              </template>
-            </vue3-simple-typeahead>
-          </div>
-          <div class="flex items-center">
-            <div class="p-1">
-              <font-awesome-icon
-                :icon="['fas', 'circle-minus']"
-                size="xl"
-                style="color: #157d7f"
-                class="inline-block"
-                @click="searchRemove = !searchRemove"
-              />
-              <label
-                for="typeahead_remove"
-                @click="searchRemove = !searchRemove"
-                class="ms-1 text-[18px] font-bold"
-                >刪減股票績效</label
+            <div>
+              <ul>
+                <li v-for="v in MultiChart" class="w-[75%] ms-[30px] flex items-center my-1 cursor-pointer">
+                  <div class="p-1">
+                    <font-awesome-icon
+                      :icon="['far', 'square-minus']"
+                      style="color: black"
+                      class="inline-block"
+                      @click="changeChart('remove',v.name)"
+                    />
+                  </div>
+                  <img
+                    :src="`https://financialmodelingprep.com/image-stock/${v.name}.png`"
+                    class="inline-block w-[20px] h-[20px] aspect-square mx-2"
+                    :class="
+                      v.name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''
+                    "
+                    @error="onError"
+                  />
+                  <p>{{ v.name }}</p>
+                </li>
+              </ul>
+            </div>
+            <!-- <div class="flex items-center">
+              <div class="p-1">
+                <font-awesome-icon
+                  :icon="['fas', 'circle-minus']"
+                  size="xl"
+                  style="color: #157d7f"
+                  class="inline-block"
+                  @click="searchRemove = !searchRemove"
+                />
+                <label
+                  for="typeahead_remove"
+                  @click="searchRemove = !searchRemove"
+                  class="ms-1 text-[18px] font-bold"
+                  >刪減股票績效</label
+                >
+              </div>
+              <vue3-simple-typeahead
+                id="typeahead_remove"
+                placeholder="搜尋股票..."
+                v-if="searchRemove"
+                class="w-[300px] m-4 p-1 bg-white rounded shadow :active:border-white"
+                :items="checkData"
+                :minInputLength="1"
+                v-model="searchRemoveStock"
+                @onInput="onInputEventHandler"
+                @keydown.native.enter="changeChart('remove')"
+                @selectItem="selectRemoveItem"
               >
-            </div>
-            <vue3-simple-typeahead
-              id="typeahead_remove"
-              placeholder="搜尋股票..."
-              v-if="searchRemove"
-              class="w-[300px] m-4 p-1 bg-white rounded shadow :active:border-white"
-              :items="checkData"
-              :minInputLength="1"
-              v-model="searchRemoveStock"
-              @onInput="onInputEventHandler"
-              @keydown.native.enter="changeChart('remove')"
-              @selectItem="selectRemoveItem"
-            >
-              <template #list-item-text="slot">
-                <div class="">
-                  <span
-                    class="inline-block w-[300px] bg-white rounded shadow ms-4 mb-1"
-                    v-html="slot.boldMatchText(slot.itemProjection(slot.item))"
-                  ></span>
-                </div>
-              </template>
-            </vue3-simple-typeahead>
+                <template #list-item-text="slot">
+                  <div class="">
+                    <span
+                      class="inline-block w-[300px] bg-white rounded shadow ms-4 mb-1"
+                      v-html="
+                        slot.boldMatchText(slot.itemProjection(slot.item))
+                      "
+                    ></span>
+                  </div>
+                </template>
+              </vue3-simple-typeahead>
+            </div> -->
           </div>
         </ClientOnly>
         <ClientOnly>
           <highcharts
-            class="mx-auto mb-10"
+            class="mb-10 w-[70%]"
             :constructor-type="'stockChart'"
             :options="chartOptionsMulti"
           />
@@ -456,7 +494,7 @@ const onInputEventHandler = () => {
   })
 }
 
-const changeChart = async (change) => {
+const changeChart = async (change, stock) => {
   console.log(change)
   if (change === 'add') {
     let newChart = []
@@ -476,8 +514,12 @@ const changeChart = async (change) => {
       milliseconds = dateObject.getTime()
       return [milliseconds, v.close]
     })
-    MultiChart.value.push({ name: searchAddStock.value, data: newChart })
+    MultiChart.value.push({
+      name: searchAddStock.value.toUpperCase(),
+      data: newChart,
+    })
   } else if (change === 'remove') {
+    searchRemoveStock.value = stock
     MultiChart.value = MultiChart.value.filter(
       (item) => item.name !== searchRemoveStock.value
     )
@@ -492,6 +534,32 @@ const chartOptionsMulti = computed(() => {
     },
     // 預設選第五個選擇器(1y)
     rangeSelector: {
+      // buttonTheme: { // styles for the buttons
+      //           fill: 'none',
+      //           stroke: 'none',
+      //           strokeWidth: 0,
+      //           r: 3,
+      //           width: 50,  // 设置按钮的宽度
+      //           height: 30, // 设置按钮的高度
+      //           style: {
+      //               color: '#284a6b',
+      //               fontWeight: 'bold',
+      //               lineWidth:5,
+      //               fontSize:'16px'
+      //           },
+      //           states: {
+      //               hover: {
+      //               },
+      //               select: {
+      //                   fill: '#284a6b',
+      //                   style: {
+      //                       color: 'white',
+      //                   }
+      //               }
+      //           // disabled: { ... }
+      //           }
+      //         },
+              
       selected: 4,
     },
     yAxis: {
@@ -605,9 +673,30 @@ const translateKey = (key) => {
   }
   return translations[key] || key
 }
+
+// 死圖
+
+const onError = (event) => {
+  // 當圖片加載失敗時，可以把 src 設為空或者預設的佔位圖片
+  // event.target.style.display = 'none';
+  event.target.src = '/FTNT.png'
+}
+
 </script>
 <style lang="scss" scoped>
 .stockborder {
   border-top: 1px solid black;
 }
+.ttt {
+  background-color: #f4ede2;
+  background-color: #daeff2;
+  background-color: #99d3e6;
+  background-color: #6a8c94;
+  background-color: #d5d8d4;
+}
+// --color_16: 218,239,242;
+// --color_26: 153,211,230;
+// --color_19: 106,140,148;
+// --color_31: 213,216,212;
+// --bg-overlay-color: rgb(244, 237, 226);
 </style>
