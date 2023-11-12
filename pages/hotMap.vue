@@ -1,11 +1,11 @@
 <template>
   <NuxtLayout name="header">
     <template #main>
-      <div>
+      <div class="mx-auto">
         <ClientOnly>
           <highcharts
             v-if="chartOptions"
-            class="w-[90%] mx-auto my-10"
+            class="w-[92%] mx-auto my-10"
             :constructor-type="'chart'"
             :options="chartOptions"
           />
@@ -218,12 +218,17 @@ const stockFullData = computed(() => {
   return data
 })
 
+// 最終圖表顯示data
 const chartData = computed(() => {
   const data = stockFullData.value
     ? stockFullData.value.map((v) => {
         return {
           id: v.name,
-          name: `${v.symbol} ${v.changesPercentage} %`,
+          name: `<h3 style="font-size:48px;">${
+            v.symbol
+          }</h3><h4 style="font-size:24px;text-align:center;">${twoAfterDecimal(
+            v.changesPercentage
+          )} %</h4>`,
           colorValue: v.changesPercentage,
           parent: v.industry,
           value: v.volume,
@@ -260,7 +265,7 @@ const chartData = computed(() => {
     ? [...industry].map((v) => {
         const data = {
           id: v,
-          name: v,
+          name: `<div style="background-color: #000000;width:100px;word-break: break-all;overflow-wrap: break-word;textOverflow: ellipsis;"><h3>${v}</h3></div>`,
           parent: 'Technology',
           color: 'transparent',
         }
@@ -288,13 +293,12 @@ watchEffect(async () => {
 
 const check = ref(false)
 
-
-
 const chartOptions = computed(() => {
   return chartData.value
     ? {
         chart: {
-          height: '800px',
+          height: '55%',
+          width: '1400',
         },
         colorAxis: {
           // minColor: '#F63538',
@@ -342,6 +346,8 @@ const chartOptions = computed(() => {
             layoutAlgorithm: 'squarified',
             allowDrillToNode: true,
             animationLimit: 1000,
+            // borderWidth: 3,
+            // borderColor: '#fff',
             // dataLabels: {
             //   enabled: true,
             // },
@@ -350,7 +356,7 @@ const chartOptions = computed(() => {
                 level: 1,
                 //第一層標籤
                 dataLabels: {
-                  enabled: true,
+                  enabled: false,
                   align: 'left', // 左對齊
                   verticalAlign: 'top', // 置於區塊的最上方
                   fontSize: '14px',
@@ -369,9 +375,12 @@ const chartOptions = computed(() => {
                   width: '100%',
                 },
                 color: 'transparent',
-                borderWidth: 1,
+                borderWidth: 8,
                 borderColor: '#363a46',
-                levelIsConstant: false,
+                levelIsConstant: true,
+                tooltip: {
+                  enabled: false,
+                },
               },
               {
                 level: 2,
@@ -387,6 +396,7 @@ const chartOptions = computed(() => {
                   },
                 },
                 color: 'transparent',
+                borderWidth: 5,
                 borderColor: '#363a46',
               },
               {
@@ -395,14 +405,77 @@ const chartOptions = computed(() => {
                   useHTML: true,
                   formatter: function () {
                     // 檢查框框的面積
+                    console.log(this.point)
                     if (
-                      this.point.shapeArgs.width * this.point.shapeArgs.height <
-                      3000
+                      this.point.shapeArgs.width / this.point.shapeArgs.height >
+                        20 ||
+                      this.point.shapeArgs.height / this.point.shapeArgs.width >
+                        20
                     ) {
-                      // 這裡的 5000 是一個示例值，你可以根據需要調整
+                      return null
+                    }
+                    if (
+                      this.point.shapeArgs.width * this.point.shapeArgs.height >
+                      200000
+                    ) {
+                      return this.point.name
+                    } else if (
+                      this.point.shapeArgs.width * this.point.shapeArgs.height >
+                      40000
+                    ) {
+                      return this.point.name
+                        .replace(
+                          '<h3 style="font-size:48px;">',
+                          '<h3 style="font-size:36px;">'
+                        )
+                        .replace(
+                          '<h4 style="font-size:24px;text-align:center;">',
+                          '<h4 style="font-size:18px;text-align:center;">'
+                        )
+                    } else if (
+                      this.point.shapeArgs.width * this.point.shapeArgs.height >
+                      15000
+                    ) {
+                      return this.point.name
+                        .replace(
+                          '<h3 style="font-size:48px;">',
+                          '<h3 style="font-size:24px;">'
+                        )
+                        .replace(
+                          '<h4 style="font-size:24px;text-align:center;">',
+                          '<h4 style="font-size:12px;text-align:center;">'
+                        )
+                    } else if (
+                      this.point.shapeArgs.width * this.point.shapeArgs.height >
+                      7500
+                    ) {
+                      return this.point.name
+                        .replace(
+                          '<h3 style="font-size:48px;">',
+                          '<h3 style="font-size:16px;">'
+                        )
+                        .replace(
+                          '<h4 style="font-size:24px;text-align:center;">',
+                          '<h4 style="font-size:12px;text-align:center;">'
+                        )
+                    } else if (
+                      this.point.shapeArgs.width * this.point.shapeArgs.height >
+                      4000
+                    ) {
+                      return this.point.name
+                        .replace(
+                          '<h3 style="font-size:48px;">',
+                          '<h3 style="font-size:12px;">'
+                        )
+                        .replace(
+                          '<h4 style="font-size:24px;text-align:center;">',
+                          '<h4 style="font-size:8px;text-align:center;display:none;">'
+                        )
+                    } else {
+                      // console.log(this.point)
                       return null // 不顯示 dataLabel
                     }
-                    return this.point.name
+                    // return this.point.name
                   },
                   enabled: true,
                   align: 'center', // 左對齊
@@ -414,6 +487,7 @@ const chartOptions = computed(() => {
                     textOverflow: 'pre-wrap',
                   },
                 },
+                borderWidth: 1,
                 borderColor: '#363a46',
                 color: 'transparent',
               },
@@ -428,20 +502,30 @@ const chartOptions = computed(() => {
           },
         ],
         subtitle: {
-          text: 'Software—Infrastructure',
+          text: 'Technology',
           align: 'left',
         },
         title: {
           text: '股票熱區地圖',
           align: 'left',
         },
+        tooltip: {
+          enabled: false,
+        },
       }
     : undefined
 })
+
+// 取到小數後兩位
+
+const twoAfterDecimal = (num) => {
+  num = Math.round(num * 100) / 100
+  return num
+}
 </script>
 <style lang="scss" scoped>
 .box1 {
-  background-color: #4a4c52;
+  background-color: #000000;
 }
 .label_text {
   @apply text-white;
