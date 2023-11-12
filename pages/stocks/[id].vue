@@ -89,7 +89,7 @@
                   fade
                   style="color: black"
                   class="mx-2"
-                  @click="searchAdd = !searchAdd"
+                  @click="cancelsel"
                 />
                 <label
                   for="typeahead_add"
@@ -99,21 +99,21 @@
                 >
               </div>
               <vue3-simple-typeahead
+                ref="inputRef"
                 id="typeahead_add"
                 placeholder="搜尋股票..."
                 v-if="searchAdd"
-                class="w-[98%] m-4 p-1 bg-white rounded shadow :active:border-white"
+                class="w-[98%] p-1 bg-white rounded shadow :active:border-white"
                 :items="checkData"
                 :minInputLength="1"
                 v-model="searchAddStock"
                 @onInput="onInputEventHandler"
                 @keydown.native.enter="changeChart('add')"
-                @selectItem="selecAddtItem"
+                @selectItem="selectAddtItem"
               >
                 <template #list-item-text="slot">
-                  <div class="">
-                    <span
-                      class="inline-block w-[300px] bg-white rounded shadow ms-4 mb-1"
+                  <div  class="">
+                    <span 
                       v-html="
                         slot.boldMatchText(slot.itemProjection(slot.item))
                       "
@@ -480,8 +480,9 @@ const addChartApi = computed(() => {
   return `https://financialmodelingprep.com/api/v3/historical-price-full/${searchAddStock.value}?timeseries=365&apikey=${fmp}`
 })
 
-const selecAddtItem = (item) => {
+const selectAddtItem = (item) => {
   searchAddStock.value = item
+  changeChart('add')
 }
 
 const selectRemoveItem = (item) => {
@@ -494,19 +495,29 @@ const onInputEventHandler = () => {
   })
 }
 
+//取消搜尋框enter預設
+
+const inputRef = ref()
+const cancelsel = async () =>{
+  searchAdd.value = !searchAdd.value
+  await nextTick()
+  inputRef.value.selectCurrentSelection =()=>{}
+}
+
 const changeChart = async (change, stock) => {
-  console.log(change)
   if (change === 'add') {
     let newChart = []
     await axios
       .get(addChartApi.value)
       .then((res) => {
-        console.log(res.data.historical)
+        console.log(res)
         newChart = res.data.historical
+        console.log(newChart)
       })
       .catch((rej) => {
         console.log(rej)
       })
+    if(newChart !== undefined){
     newChart = newChart.reverse().map((v) => {
       const dateTimeString = v.date // 日期
       let milliseconds // 換算後的時間
@@ -517,7 +528,13 @@ const changeChart = async (change, stock) => {
     MultiChart.value.push({
       name: searchAddStock.value.toUpperCase(),
       data: newChart,
+    })}else{
+      ElMessageBox.confirm('無此檔股票,請重新搜尋', '提示', {
+      showCancelButton: false,
+      confirmButtonText: '確定',
+      type: 'success',
     })
+    }
   } else if (change === 'remove') {
     searchRemoveStock.value = stock
     MultiChart.value = MultiChart.value.filter(
@@ -699,4 +716,22 @@ const onError = (event) => {
 // --color_19: 106,140,148;
 // --color_31: 213,216,212;
 // --bg-overlay-color: rgb(244, 237, 226);
+
+:deep(.simple-typeahead){
+  width: 60%;
+}
+
+:deep(.simple-typeahead-list) {
+  background-color: yellow;
+  width: 98% !important;
+  border: 0.1rem solid black !important;
+}
+
+// :deep(.simple-typeahead-list-item-text) {
+//     color: red;
+//     font-size: 30px !important;
+// }
+:deep(.simple-typeahead-list-item) {    
+    background-color: white !important;
+}
 </style>

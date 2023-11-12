@@ -55,7 +55,7 @@ import { faUserSecret,faCirclePlus,faCircleMinus,faMinus} from '@fortawesome/fre
 
 import { faSquareMinus,faSquarePlus } from '@fortawesome/free-regular-svg-icons'
 
-// import 'vue3-simple-typeahead/dist/vue3-simple-typeahead.css'; 
+import 'vue3-simple-typeahead/dist/vue3-simple-typeahead.css'; 
 
 export default defineNuxtPlugin((nuxtApp) => {
   // 股票模組化
