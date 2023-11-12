@@ -1,30 +1,6 @@
 <template>
   <NuxtLayout name="header">
     <template #main>
-      <div>
-        <ClientOnly>
-          <vue3-simple-typeahead
-            id="typeahead_id"
-            placeholder="搜尋股票..."
-            class="w-[300px] m-4 p-1 bg-white rounded shadow :active:border-white"
-            :items="checkData"
-            v-model="searchStock"
-            :minInputLength="1"
-            @onInput="onInputEventHandler"
-            @keydown.native.enter="searchToStock"
-            @selectItem="selectItemEventHandler"
-          >
-            <template #list-item-text="slot">
-              <div class="">
-                <span
-                  class="inline-block w-[300px] bg-white rounded shadow ms-4 mb-1"
-                  v-html="slot.boldMatchText(slot.itemProjection(slot.item))"
-                ></span>
-              </div>
-            </template>
-          </vue3-simple-typeahead>
-        </ClientOnly>
-      </div>
       <div class="box">
         <div
           v-for="v in buttons"
@@ -72,18 +48,18 @@
         />
       </ClientOnly>
       <div v-if="gainRankingOnTheDay" class="py-20">
-        <h3 class="text-center font-bold text-2xl mb-[20px]">
+        <h3 class="text-center font-bold text-2xl mb-[40px]">
           當日上漲股票排名
         </h3>
         <ul class="flex flex-wrap justify-around">
           <li v-for="v in gainRankingOnTheDay" :key="v.name" class="racebox">
             <div class="flex items-center">
-                <img
-                  :src="`https://financialmodelingprep.com/image-stock/${v.symbol}.png`"
-                  class="inline-block w-[35px] h-[35px] aspect-square me-2"
-                  :class="v.name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''"
-                  @error="onError"
-                />
+              <img
+                :src="`https://financialmodelingprep.com/image-stock/${v.symbol}.png`"
+                class="inline-block w-[35px] h-[35px] aspect-square me-3"
+                :class="v.name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''"
+                @error="onError"
+              />
               <div>
                 <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
                 <p>{{ v.symbol }}</p>
@@ -94,49 +70,64 @@
                 {{ `${twoAfterDecimal(v.price)}`
                 }}<span class="font-normal text-[10px] ms-1">USD</span>
               </p>
-              <p class="percent w-[80px] text-center">
+              <p class="percent text-center">
                 {{ `+${twoAfterDecimal(v.changesPercentage)}%` }}
               </p>
             </div>
           </li>
         </ul>
-        <h3 class="text-center font-bold text-2xl mb-[20px]">
+        <h3 class="text-center font-bold text-2xl my-[40px]">
           當日下跌股票排名
         </h3>
         <ul class="flex flex-wrap justify-around">
           <li v-for="v in loseRankingOnThatDay" class="racebox">
-            <div>
-              <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
-              <p>{{ v.symbol }}</p>
+            <div class="flex items-center">
+              <img
+                :src="`https://financialmodelingprep.com/image-stock/${v.symbol}.png`"
+                class="inline-block w-[35px] h-[35px] aspect-square me-3"
+                :class="v.name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''"
+                @error="onError"
+              />
+              <div>
+                <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
+                <p>{{ v.symbol }}</p>
+              </div>
             </div>
             <div class="flex items-center">
               <p class="font-bold me-5">
-                {{ v.price
+                {{ `${twoAfterDecimal(v.price)}`
                 }}<span class="font-normal text-[10px] ms-1">USD</span>
               </p>
-              <p class="percent bg-[#ff0000]">
-                {{ `${twoAfterDecimal(v.changesPercentage)}%` }}
+              <p class="percent text-center bg-[#ff0000]">
+                {{ `+${twoAfterDecimal(v.changesPercentage)}%` }}
               </p>
             </div>
           </li>
         </ul>
-        <h3 class="text-center font-bold text-2xl mb-[20px]">
+        <h3 class="text-center font-bold text-2xl my-[40px]">
           當日活躍股票排名
         </h3>
         <ul class="flex flex-wrap justify-around">
           <li v-for="v in activeRankingOnThatDay" :key="v.name" class="racebox">
-            <div>
-              <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
-              <p>{{ v.symbol }}</p>
+            <div class="flex items-center">
+              <img
+                :src="`https://financialmodelingprep.com/image-stock/${v.symbol}.png`"
+                class="inline-block w-[35px] h-[35px] aspect-square me-3"
+                :class="v.name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''"
+                @error="onError"
+              />
+              <div>
+                <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
+                <p>{{ v.symbol }}</p>
+              </div>
             </div>
             <div class="flex items-center">
               <p class="font-bold me-5">
-                {{ v.price
+                {{ `${twoAfterDecimal(v.price)}`
                 }}<span class="font-normal text-[10px] ms-1">USD</span>
               </p>
-              <p class="percent bg-zinc-700">
-                <span v-if="v.changesPercentage > 0">+</span
-                >{{ `${twoAfterDecimal(v.changesPercentage)}%` }}
+              <p class="percent text-center bg-zinc-700">
+                {{ `+${twoAfterDecimal(v.changesPercentage)}%` }}
               </p>
             </div>
           </li>
@@ -197,9 +188,10 @@
             class="news"
           >
             <img
-              :src="v.banner_image"
+              :src="v.banner_image ? v.banner_image : '/FTNT.png'"
               class="w-[30%] aspect-square object-contain me-3"
               alt=""
+              @error="onError"
             />
             <div>
               <h3 class="py-1 text-ellipsis overflow-hidden">
@@ -349,6 +341,7 @@ const getData = (stock = 'AAPL', company = 'Apple Inc.') => {
     .then((res) => {
       news.value = res.data.feed
       news.value.length = 20
+      console.log(news.value)
     })
     .catch((err) => {
       console.log(err)
@@ -533,23 +526,6 @@ const activeRankingOnThatDay = computed(() => {
   actives.length = 5
   return actives
 })
-
-// 預先輸入功能
-
-const selectItemEventHandler = (item) => {
-  searchStock.value = item
-  searchToStock()
-}
-
-const onInputEventHandler = () => {
-  axios.get(searchApi.value).then((res) => {
-    checkData.value = res.data.map((v) => v.symbol)
-  })
-}
-
-const searchToStock = () => {
-  router.push(`/stocks/${searchStock.value}`)
-}
 
 // 選擇新聞類型
 
