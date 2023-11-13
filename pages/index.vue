@@ -307,7 +307,7 @@ onMounted(() => {
 const realTimeOffer = computed(() => {
   return data.value
     ? data.value.reverse().map((v) => {
-        const timeStamp = +dayjs(v.date) // 換算後的時間
+        const timeStamp = +dayjs(v.date) 
         return [timeStamp, parseFloat(v['2. high'])]
       })
     : undefined

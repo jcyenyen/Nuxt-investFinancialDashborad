@@ -145,46 +145,6 @@
                 </li>
               </ul>
             </div>
-            <!-- <div class="flex items-center">
-              <div class="p-1">
-                <font-awesome-icon
-                  :icon="['fas', 'circle-minus']"
-                  size="xl"
-                  style="color: #157d7f"
-                  class="inline-block"
-                  @click="searchRemove = !searchRemove"
-                />
-                <label
-                  for="typeahead_remove"
-                  @click="searchRemove = !searchRemove"
-                  class="ms-1 text-[18px] font-bold"
-                  >刪減股票績效</label
-                >
-              </div>
-              <vue3-simple-typeahead
-                id="typeahead_remove"
-                placeholder="搜尋股票..."
-                v-if="searchRemove"
-                class="w-[300px] m-4 p-1 bg-white rounded shadow :active:border-white"
-                :items="checkData"
-                :minInputLength="1"
-                v-model="searchRemoveStock"
-                @onInput="onInputEventHandler"
-                @keydown.native.enter="changeChart('remove')"
-                @selectItem="selectRemoveItem"
-              >
-                <template #list-item-text="slot">
-                  <div class="">
-                    <span
-                      class="inline-block w-[300px] bg-white rounded shadow ms-4 mb-1"
-                      v-html="
-                        slot.boldMatchText(slot.itemProjection(slot.item))
-                      "
-                    ></span>
-                  </div>
-                </template>
-              </vue3-simple-typeahead>
-            </div> -->
           </div>
         </ClientOnly>
         <ClientOnly>
@@ -201,6 +161,8 @@
 <script setup>
 import axios from 'axios'
 import draggable from 'vuedraggable'
+
+const dayjs = useDayjs()
 
 const route = useRoute()
 const id = route.params.id
@@ -240,11 +202,8 @@ const stockChartRev = computed(() =>
 const ohlc = computed(() => {
   const data = stockChartRev.value
     ? stockChartRev.value.map((v) => {
-        const dateTimeString = v.date // 日期
-        let milliseconds // 換算後的時間
-        const dateObject = new Date(dateTimeString)
-        milliseconds = dateObject.getTime()
-        return [milliseconds, v.open, v.high, v.low, v.close]
+        const timeStamp = +dayjs(v.date) 
+        return [timeStamp, v.open, v.high, v.low, v.close]
       })
     : []
   return data
@@ -253,11 +212,8 @@ const ohlc = computed(() => {
 const volume = computed(() => {
   const data = stockChartRev.value
     ? stockChartRev.value.map((v) => {
-        const dateTimeString = v.date // 日期
-        let milliseconds // 換算後的時間
-        const dateObject = new Date(dateTimeString)
-        milliseconds = dateObject.getTime()
-        return [milliseconds, v.volume]
+        const timeStamp = +dayjs(v.date) 
+        return [timeStamp, v.volume]
       })
     : []
   return data
@@ -433,11 +389,8 @@ const afterChartInit = (chart) => {
 const fix = (stock) => {
   const data = stock
     ? stock.map((v) => {
-        const dateTimeString = v.date // 日期
-        let milliseconds // 換算後的時間
-        const dateObject = new Date(dateTimeString)
-        milliseconds = dateObject.getTime()
-        return [milliseconds, v.close]
+        const timeStamp = +dayjs(v.date) 
+        return [timeStamp, v.close]
       })
     : []
   return data
@@ -450,7 +403,6 @@ const stockChartFix = computed(() => {
 // 增加&刪減股票
 
 const searchAdd = ref(false)
-const searchRemove = ref(false)
 const checkData = ref([])
 const searchAddStock = ref('')
 const searchRemoveStock = ref('')
@@ -461,15 +413,11 @@ watchEffect(() => {
   MultiChart.value = stockChartFix
     ? [
         {
-          name: `${id}`,
+          name: `${id.toUpperCase()}`,
           data: stockChartFix.value,
         },
       ]
     : []
-  // if(stockData.value.symbol){
-  //   let {exchange,zip,dcfDiff,dcf,image,defaultImage,isEtf,isActivelyTrading,isAdr,isFund, ...desiredObject} = stockData.value
-  //   stockData.value = desiredObject
-  // }
 })
 
 const searchApi = computed(() => {
@@ -519,11 +467,8 @@ const changeChart = async (change, stock) => {
       })
     if(newChart !== undefined){
     newChart = newChart.reverse().map((v) => {
-      const dateTimeString = v.date // 日期
-      let milliseconds // 換算後的時間
-      const dateObject = new Date(dateTimeString)
-      milliseconds = dateObject.getTime()
-      return [milliseconds, v.close]
+      const timeStamp = +dayjs(v.date) 
+      return [timeStamp, v.close]
     })
     MultiChart.value.push({
       name: searchAddStock.value.toUpperCase(),
@@ -546,6 +491,9 @@ const changeChart = async (change, stock) => {
 // 績效圖表
 const chartOptionsMulti = computed(() => {
   return {
+    accessibility:{
+          enabled:false
+        },
     chart: {
       height: 500,
     },
@@ -689,14 +637,6 @@ const translateKey = (key) => {
     isFund: '是基金',
   }
   return translations[key] || key
-}
-
-// 死圖
-
-const onError = (event) => {
-  // 當圖片加載失敗時，可以把 src 設為空或者預設的佔位圖片
-  // event.target.style.display = 'none';
-  event.target.src = '/FTNT.png'
 }
 
 </script>
