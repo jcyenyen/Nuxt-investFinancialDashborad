@@ -47,93 +47,39 @@
           :options="chartOptions"
         />
       </ClientOnly>
-      <div v-if="gainRankingOnTheDay" class="py-20">
-        <h3 class="text-center font-bold text-2xl mb-[40px]">
-          當日上漲股票排名
-        </h3>
-        <ul class="flex flex-wrap justify-around">
-          <li v-for="v in gainRankingOnTheDay" :key="v.name" class="racebox">
-            <div class="flex items-center">
-              <img
-                :src="`https://financialmodelingprep.com/image-stock/${v.symbol}.png`"
-                class="inline-block w-[35px] h-[35px] aspect-square me-3"
-                :class="v.name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''"
-                @error="onError"
-              />
-              <div>
-                <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
-                <p>{{ v.symbol }}</p>
+      <template v-if="presenceStock">
+        <div v-for="Ranking in presenceStock" class="py-10">
+          <h3 class="text-center font-bold text-2xl mb-[40px]">
+            {{rankingJudge(Ranking.config.url)}}
+          </h3>
+          <ul class="flex flex-wrap justify-around">
+            <li v-for="v in Ranking.data" :key="v.name" class="racebox">
+              <div class="flex items-center">
+                <img
+                  :src="`https://financialmodelingprep.com/image-stock/${v.symbol}.png`"
+                  class="inline-block w-[35px] h-[35px] aspect-square me-3"
+                  :class="v.name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''"
+                  @error="onError"
+                />
+                <div>
+                  <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
+                  <p>{{ v.symbol }}</p>
+                </div>
               </div>
-            </div>
-            <div class="flex items-center">
-              <p class="font-bold me-5">
-                {{ `${twoAfterDecimal(v.price)}`
-                }}<span class="font-normal text-[10px] ms-1">USD</span>
-              </p>
-              <p class="percent text-center">
-                {{ `+${twoAfterDecimal(v.changesPercentage)}%` }}
-              </p>
-            </div>
-          </li>
-        </ul>
-        <h3 class="text-center font-bold text-2xl my-[40px]">
-          當日下跌股票排名
-        </h3>
-        <ul class="flex flex-wrap justify-around">
-          <li v-for="v in loseRankingOnThatDay" class="racebox">
-            <div class="flex items-center">
-              <img
-                :src="`https://financialmodelingprep.com/image-stock/${v.symbol}.png`"
-                class="inline-block w-[35px] h-[35px] aspect-square me-3"
-                :class="v.name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''"
-                @error="onError"
-              />
-              <div>
-                <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
-                <p>{{ v.symbol }}</p>
+              <div class="flex items-center">
+                <p class="font-bold me-5">
+                  {{ `${twoAfterDecimal(v.price)}`
+                  }}<span class="font-normal text-[10px] ms-1">USD</span>
+                </p>
+                <p class="percent text-center" :class="rankingJudge(Ranking.config.url,'color')">
+                  {{ `+${twoAfterDecimal(v.changesPercentage)}%` }}
+                </p>
               </div>
-            </div>
-            <div class="flex items-center">
-              <p class="font-bold me-5">
-                {{ `${twoAfterDecimal(v.price)}`
-                }}<span class="font-normal text-[10px] ms-1">USD</span>
-              </p>
-              <p class="percent text-center bg-[#ff0000]">
-                {{ `+${twoAfterDecimal(v.changesPercentage)}%` }}
-              </p>
-            </div>
-          </li>
-        </ul>
-        <h3 class="text-center font-bold text-2xl my-[40px]">
-          當日活躍股票排名
-        </h3>
-        <ul class="flex flex-wrap justify-around">
-          <li v-for="v in activeRankingOnThatDay" :key="v.name" class="racebox">
-            <div class="flex items-center">
-              <img
-                :src="`https://financialmodelingprep.com/image-stock/${v.symbol}.png`"
-                class="inline-block w-[35px] h-[35px] aspect-square me-3"
-                :class="v.name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''"
-                @error="onError"
-              />
-              <div>
-                <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
-                <p>{{ v.symbol }}</p>
-              </div>
-            </div>
-            <div class="flex items-center">
-              <p class="font-bold me-5">
-                {{ `${twoAfterDecimal(v.price)}`
-                }}<span class="font-normal text-[10px] ms-1">USD</span>
-              </p>
-              <p class="percent text-center bg-zinc-700">
-                {{ `+${twoAfterDecimal(v.changesPercentage)}%` }}
-              </p>
-            </div>
-          </li>
-        </ul>
-      </div>
-      <div class="flex w-[95%] mx-auto mb-[100px]">
+            </li>
+          </ul>
+        </div>
+      </template>
+      <div class="flex w-[95%] mt-10 mx-auto mb-[100px]">
         <div
           class="w-[20%] h-[850px] p-5 border border-solid border-black rounded box-border mt-2"
         >
@@ -334,8 +280,12 @@ const getData = (stock = 'AAPL', company = 'Apple Inc.') => {
       ])
     })
     .then((res) => {
+      // 限制排名5筆
+      res.forEach((v)=>{
+        v.data.length=5
+      })
       presenceStock.value = res
-      console.log(res[0])
+      console.log(res)
       return axios.get(newsApi.value)
     })
     .then((res) => {
@@ -353,8 +303,6 @@ onMounted(() => {
   getData()
 })
 
-const test = new Date('2023-09-29').getTime()
-console.log(test)
 // 將資料轉換成[時間,股價]
 const realTimeOffer = computed(() => {
   return data.value
@@ -397,7 +345,6 @@ const chartOptions = computed(() => {
         // styles for the buttons
         fill: 'none',
         stroke: 'none',
-        strokeWidth: 0,
         r: 3,
         width: 50, // 设置按钮的宽度
         height: 30, // 设置按钮的高度
@@ -506,6 +453,18 @@ const chartOptions = computed(() => {
   }
 })
 
+// 判斷上漲下跌活躍顏色
+
+const rankingJudge=(kind,type)=>{
+  if(kind.includes('gainer')){
+    return type === 'color'?'':'當日上漲股票排名'
+  }else if(kind.includes('loser')){
+    return type === 'color'?'bg-[#ff0000]':'當日下跌股票排名'
+  } else if(kind.includes('active')){
+    return type === 'color'?'bg-zinc-700':'當日活躍股票排名'
+  }
+}
+
 // 上漲前5
 const gainRankingOnTheDay = computed(() => {
   const gainers = presenceStock.value ? presenceStock.value[0].data : []
@@ -541,21 +500,6 @@ const chooseNews = () => {
     .catch((err) => {
       console.log(err)
     })
-}
-
-// 取到小數後兩位
-
-const twoAfterDecimal = (num) => {
-  num = Math.round(num * 100) / 100
-  return num
-}
-
-// 死圖
-
-const onError = (event) => {
-  // 當圖片加載失敗時，可以把 src 設為空或者預設的佔位圖片
-  // event.target.style.display = 'none';
-  event.target.src = '/FTNT.png'
 }
 </script>
 <style lang="scss" scoped>
