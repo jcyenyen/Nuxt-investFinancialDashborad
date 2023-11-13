@@ -87,7 +87,7 @@
           </select>
         </div>
       </div>
-      <div class="w-[90%] mx-auto">
+      <div class="w-[93%] mx-auto">
         <el-table :data="stockResult" style="width: 100%" class="">
           <el-table-column prop="symbol" label="股票代號" mid-width="100">
             <template #default="scope">
@@ -101,6 +101,7 @@
                       ? 'bg-black p-1 rounded-[50%]'
                       : ''
                   "
+                  @error="onError"
                 />
                 <nuxt-link
                   :to="`/stocks/${scope.row.symbol}`"
@@ -191,26 +192,28 @@ definePageMeta({
 // key
 const fmp = import.meta.env.VITE_KEY_FMP
 
+// 找相對的上限或下限
+const matchOption = (option,limit,choose)=>{
+  const match = option.find((v) => v.value === choose)
+  return match ? match[limit] : ''
+}
+
 // 篩選條件
 
 const marketCap = ref('')
 const marketCapMore = computed(() => {
-  const match = marketCapOption.value.find((v) => v.value === marketCap.value)
-  return match ? match.more : ''
+  return matchOption(marketCapOption.value,'more',marketCap.value)
 })
 const marketCapLower = computed(() => {
-  const match = marketCapOption.value.find((v) => v.value === marketCap.value)
-  return match ? match.lower : ''
+  return matchOption(marketCapOption.value,'lower',marketCap.value)
 })
 
 const volume = ref('')
 const volumeMore = computed(() => {
-  const match = volumeOption.value.find((v) => v.value === volume.value)
-  return match ? match.more : ''
+  return matchOption(volumeOption.value,'more',volume.value)
 })
 const volumeLower = computed(() => {
-  const match = volumeOption.value.find((v) => v.value === volume.value)
-  return match ? match.lower : ''
+  return matchOption(volumeOption.value,'lower',volume.value)
 })
 
 const sector = ref('Technology')
@@ -218,32 +221,26 @@ const industry = ref('Software—Infrastructure')
 
 const dividend = ref('')
 const dividendMore = computed(() => {
-  const match = dividendOption.value.find((v) => v.value === dividend.value)
-  return match ? match.more : ''
+  return matchOption(dividendOption.value,'more',dividend.value)
 })
 const dividendLower = computed(() => {
-  const match = dividendOption.value.find((v) => v.value === dividend.value)
-  return match ? match.lower : ''
+  return matchOption(dividendOption.value,'lower',dividend.value)
 })
 
 const beta = ref('')
 const betaMore = computed(() => {
-  const match = betaOption.value.find((v) => v.value === beta.value)
-  return match ? match.more : ''
+  return matchOption(betaOption.value,'more',beta.value)
 })
 const betaLower = computed(() => {
-  const match = betaOption.value.find((v) => v.value === beta.value)
-  return match ? match.lower : ''
+  return matchOption(betaOption.value,'lower',beta.value)
 })
 
 const price = ref('')
 const priceMore = computed(() => {
-  const match = priceOption.value.find((v) => v.value === price.value)
-  return match ? match.more : ''
+  return matchOption(priceOption.value,'more',price.value)
 })
 const priceLower = computed(() => {
-  const match = priceOption.value.find((v) => v.value === price.value)
-  return match ? match.lower : ''
+  return matchOption(priceOption.value,'lower',price.value)
 })
 
 // 篩選的option
@@ -361,6 +358,7 @@ const stockApi = computed(
 // 產業的option
 const sectorApi = `https://financialmodelingprep.com/api/v3/sector-performance?apikey=${fmp}`
 
+
 // 行業的option
 const industryApi = `https://financialmodelingprep.com/api/v4/industry_price_earning_ratio?date=2023-10-10&exchange=NASDAQ&apikey=${fmp}`
 
@@ -388,7 +386,6 @@ const getData = async () => {
       // split
       stockData.value = res.data
       total.value = Math.ceil(stockData.value.length / pageSize.value)
-      console.log(total.value)
       // 資料傳一次就好 動頁籤篩選後面動
     })
     .catch((rej) => {
@@ -493,17 +490,6 @@ const numberTranslate = (num) => {
     num = `${integer1},${integer2}`
   }
   return num
-}
-
-// 取到小數後兩位
-
-const twoAfterDecimal = (num) => {
-  num = Math.round(num * 100) / 100
-  return num
-}
-
-const test = async (event) => {
-  console.log(event)
 }
 
 // 分頁
