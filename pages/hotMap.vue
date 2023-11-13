@@ -29,146 +29,32 @@ const fmp = import.meta.env.VITE_KEY_FMP
 const softwareApi = `https://financialmodelingprep.com/api/v3/stock-screener?marketCapMoreThan=10000000000&volumeMoreThan=50000&sector=Technology&dividendMoreThan=0&betaLowerThan=1.5&limit=500&apikey=${fmp}`
 
 // &industry=Infrastructure
-// 'Consumer Electronics' 'Software—Infrastructure' 'Semiconductors' 'Semiconductor Equipment & Materials' 'Communication Equipment' 'Software—Application' 'Information Technology Services' 'Solar' 'Scientific & Technical Instruments' 'Computer Hardware' 'Electronic Components'
+
+const sector = ['Consumer Electronics', 'Software—Infrastructure', 'Semiconductors', 'Semiconductor Equipment & Materials', 'Communication Equipment' ,'Software—Application' ,'Information Technology Services' ,'Solar', 'Scientific & Technical Instruments', 'Computer Hardware' ,'Electronic Components']
 
 const stockData = ref()
 
-const ConsumerElectronics = computed(() => {
+// 產業篩選
+const sectorFilter = (sector) =>{
   const data = stockData.value
     ? stockData.value.filter((v) => {
-        return v.industry === 'Consumer Electronics'
+        return v.industry === sector
       })
     : []
 
   data.length = data.length <= 10 ? data.length : 10
   return data
-})
+}
 
-const SoftwareInfrastructure = computed(() => {
-  const data = stockData.value
-    ? stockData.value.filter((v) => {
-        return v.industry === 'Software—Infrastructure'
-      })
-    : []
-
-  data.length = data.length <= 10 ? data.length : 10
-  return data
-})
-
-const Semiconductors = computed(() => {
-  const data = stockData.value
-    ? stockData.value.filter((v) => {
-        return v.industry === 'Semiconductors'
-      })
-    : []
-  data.length = data.length <= 10 ? data.length : 10
-  return data
-})
-
-const SemiconductorEquipmentMaterials = computed(() => {
-  const data = stockData.value
-    ? stockData.value.filter((v) => {
-        return v.industry === 'Semiconductor Equipment & Materials'
-      })
-    : []
-
-  data.length = data.length <= 10 ? data.length : 10
-  return data
-})
-const CommunicationEquipment = computed(() => {
-  const data = stockData.value
-    ? stockData.value.filter((v) => {
-        return v.industry === 'Communication Equipment'
-      })
-    : []
-
-  data.length = data.length <= 10 ? data.length : 10
-  return data
-})
-
-const SoftwareApplication = computed(() => {
-  const data = stockData.value
-    ? stockData.value.filter((v) => {
-        return v.industry === 'Software—Application'
-      })
-    : []
-
-  data.length = data.length <= 10 ? data.length : 10
-  return data
-})
-
-const InformationTechnologyServices = computed(() => {
-  const data = stockData.value
-    ? stockData.value.filter((v) => {
-        return v.industry === 'Information Technology Services'
-      })
-    : []
-
-  data.length = data.length <= 10 ? data.length : 10
-  return data
-})
-
-const Solar = computed(() => {
-  const data = stockData.value
-    ? stockData.value.filter((v) => {
-        return v.industry === 'Solar'
-      })
-    : []
-
-  data.length = data.length <= 10 ? data.length : 10
-  return data
-})
-
-const ScientificTechnicalInstruments = computed(() => {
-  const data = stockData.value
-    ? stockData.value.filter((v) => {
-        return v.industry === 'Scientific & Technical Instruments'
-      })
-    : []
-
-  data.length = data.length <= 10 ? data.length : 10
-  return data
-})
-
-const ComputerHardware = computed(() => {
-  const data = stockData.value
-    ? stockData.value.filter((v) => {
-        return v.industry === 'Computer Hardware'
-      })
-    : []
-
-  data.length = data.length <= 10 ? data.length : 10
-  return data
-})
-
-const ElectronicComponents = computed(() => {
-  const data = stockData.value
-    ? stockData.value.filter((v) => {
-        return v.industry === 'Electronic Components'
-      })
-    : []
-
-  data.length = data.length <= 10 ? data.length : 10
-  return data
-})
-
+// 產業篩為最多10個再組合
 const technologyStock = computed(() => {
-  let data = []
-  data.push(
-    ...ConsumerElectronics.value,
-    ...SoftwareInfrastructure.value,
-    ...Semiconductors.value,
-    ...SemiconductorEquipmentMaterials.value,
-    ...CommunicationEquipment.value,
-    ...SoftwareApplication.value,
-    ...InformationTechnologyServices.value,
-    ...Solar.value,
-    ...ScientificTechnicalInstruments.value,
-    ...ComputerHardware.value,
-    ...ElectronicComponents.value
-  )
-  data = data.length ? data : []
-  return data
+  let total = []
+  sector.forEach((v)=>{
+    total.push(...sectorFilter(v))
+  })
+  total = total.length ? total : []
+  console.log(total)
+  return total
 })
 
 const getData = async () => {
@@ -272,7 +158,6 @@ const chartData = computed(() => {
         return data
       })
     : undefined
-  console.log(level2)
   const fullData = data ? [...level1, ...level2, ...data] : undefined
   return fullData
 })
@@ -291,11 +176,12 @@ watchEffect(async () => {
   }
 })
 
-const check = ref(false)
-
 const chartOptions = computed(() => {
   return chartData.value
     ? {
+        accessibility:{
+          enabled:false
+        },
         chart: {
           height: '55%',
           width: '1400',
@@ -405,7 +291,7 @@ const chartOptions = computed(() => {
                   useHTML: true,
                   formatter: function () {
                     // 檢查框框的面積
-                    console.log(this.point)
+                    // console.log(this.point)
                     if (
                       this.point.shapeArgs.width / this.point.shapeArgs.height >
                         20 ||
@@ -516,18 +402,9 @@ const chartOptions = computed(() => {
     : undefined
 })
 
-// 取到小數後兩位
-
-const twoAfterDecimal = (num) => {
-  num = Math.round(num * 100) / 100
-  return num
-}
 </script>
 <style lang="scss" scoped>
 .box1 {
   background-color: #000000;
-}
-.label_text {
-  @apply text-white;
 }
 </style>
