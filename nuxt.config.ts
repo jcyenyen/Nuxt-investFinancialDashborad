@@ -8,5 +8,8 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-  modules: ['@element-plus/nuxt']
+  modules: [
+    '@element-plus/nuxt',
+    'dayjs-nuxt'
+  ]
 })

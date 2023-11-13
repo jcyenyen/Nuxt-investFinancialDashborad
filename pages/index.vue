@@ -160,6 +160,8 @@
 import charts from 'highcharts'
 import { useRouter } from 'vue-router'
 
+const dayjs = useDayjs()
+
 const axios = inject('axios')
 definePageMeta({
   layout: false,
@@ -204,18 +206,23 @@ const checkStockToNews = computed(() => {
   return stockToNewsString || ''
 })
 
+// 2023-11-01 
+// 20231101T0000
 // 日期搜尋新聞
+
+console.log(dayjs('2023-11-01').minute(0).hour(0).format('YYYYMMDD[T]HHmm'))
 const timeStart = ref('')
 const timeEnd = ref('')
 const timeStartStr = computed(() => {
   timeStart.value = timeStart.value
-    ? timeStart.value.replace(/-/g, '') + 'T0000'
+    ? dayjs(timeStart.value).minute(0).hour(0).format('YYYYMMDD[T]HHmm')
     : ''
+  
   return timeStart.value
 })
 
 const timeEndStr = computed(() => {
-  timeEnd.value = timeEnd.value ? timeEnd.value.replace(/-/g, '') + 'T2359' : ''
+  timeEnd.value = timeEnd.value ? dayjs(timeEnd.value).minute(59).hour(23).format('YYYYMMDD[T]HHmm'): ''
   return timeEnd.value
 })
 
@@ -229,10 +236,6 @@ watchEffect(() => {
 
 // 當日股票排名
 const presenceStock = ref()
-
-// 搜尋
-const checkData = ref([])
-const searchStock = ref('')
 
 // KEY
 const alpha = import.meta.env.VITE_KEY_ALPHA
@@ -250,9 +253,7 @@ const newsApi = computed(
 const gainersStockApi = `https://financialmodelingprep.com/api/v3/stock_market/gainers?apikey=${fmp}`
 const losersStockApi = `https://financialmodelingprep.com/api/v3/stock_market/losers?apikey=${fmp}`
 const activesStockApi = `https://financialmodelingprep.com/api/v3/stock_market/actives?apikey=${fmp}`
-const searchApi = computed(() => {
-  return `https://financialmodelingprep.com/api/v3/search?query=${searchStock.value}&limit=10&exchange=NASDAQ&apikey=${fmp}`
-})
+
 
 const buttonApi = `https://financialmodelingprep.com/api/v3/quote-order/AAPL,GOOGL,META,TSLA?apikey=${fmp}`
 
@@ -291,7 +292,6 @@ const getData = (stock = 'AAPL', company = 'Apple Inc.') => {
     .then((res) => {
       news.value = res.data.feed
       news.value.length = 20
-      console.log(news.value)
     })
     .catch((err) => {
       console.log(err)
@@ -306,9 +306,9 @@ onMounted(() => {
 // 將資料轉換成[時間,股價]
 const realTimeOffer = computed(() => {
   return data.value
-    ? data.value.reverse().map((v, i) => {
-        const milliseconds = +new Date(v.date) // 換算後的時間
-        return [milliseconds, parseFloat(v['2. high'])]
+    ? data.value.reverse().map((v) => {
+        const timeStamp = +dayjs(v.date) // 換算後的時間
+        return [timeStamp, parseFloat(v['2. high'])]
       })
     : undefined
 })
@@ -464,27 +464,6 @@ const rankingJudge=(kind,type)=>{
     return type === 'color'?'bg-zinc-700':'當日活躍股票排名'
   }
 }
-
-// 上漲前5
-const gainRankingOnTheDay = computed(() => {
-  const gainers = presenceStock.value ? presenceStock.value[0].data : []
-  gainers.length = 5
-  return presenceStock.value ? gainers : undefined
-})
-
-// 下跌前5
-const loseRankingOnThatDay = computed(() => {
-  const losers = presenceStock.value ? presenceStock.value[1].data : []
-  losers.length = 5
-  return losers
-})
-
-// 活躍前5
-const activeRankingOnThatDay = computed(() => {
-  const actives = presenceStock.value ? presenceStock.value[2].data : []
-  actives.length = 5
-  return actives
-})
 
 // 選擇新聞類型
 
