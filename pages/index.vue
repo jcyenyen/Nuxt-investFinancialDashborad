@@ -13,12 +13,13 @@
             :class="v.symbol == 'AAPL' ? 'bg-black p-3 rounded-[50%]' : ''"
           />
           <div>
-            <h3
+            <nuxt-link
+              :to="`/stocks/${v.symbol}`"
               class="text-[24px] font-bold"
               @click.self="router.push(`/stocks/${v.symbol}`)"
             >
               {{ v.name }}
-            </h3>
+            </nuxt-link>
             <div class="flex items-center">
               <p class="font-[600]">
                 {{ v.price }}<span class="text-[12px]">USD</span>
@@ -159,6 +160,14 @@
 <script setup>
 import charts from 'highcharts'
 import { useRouter } from 'vue-router'
+import { usePathStore } from '../stores/header.js'
+import { storeToRefs } from 'pinia'
+
+const pathStore = usePathStore()
+const {path} =storeToRefs(pathStore)
+
+const route = useRoute()
+path.value = route.name
 
 const dayjs = useDayjs()
 

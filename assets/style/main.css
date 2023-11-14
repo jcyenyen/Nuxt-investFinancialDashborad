@@ -47,7 +47,7 @@ td {
     @apply rounded bg-white text-[16px] m-4 p-2 hover:shadow 
   }
   .nav-a {
-    @apply m-4 p-2  bg-white rounded font-bold text-xl
+    @apply m-4 p-2  bg-white rounded font-bold text-xl 
   }
   .shadows {   
     box-shadow: 3px 5px 0px 0px rgba(181, 181, 181, 0.25);

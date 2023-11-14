@@ -15,11 +15,21 @@
   </NuxtLayout>
 </template>
 <script setup>
-import charts from 'highcharts'
+import { usePathStore } from '../stores/header.js'
+import { storeToRefs } from 'pinia'
+
+const pathStore = usePathStore()
+const {path} =storeToRefs(pathStore)
+
+const route = useRoute()
+path.value = route.name
+
+
 const axios = inject('axios')
 definePageMeta({
   layout: false,
 })
+
 
 // key
 const fmp = import.meta.env.VITE_KEY_FMP
@@ -41,7 +51,6 @@ const sectorFilter = (sector) =>{
         return v.industry === sector
       })
     : []
-
   data.length = data.length <= 10 ? data.length : 10
   return data
 }

@@ -184,6 +184,15 @@
   </NuxtLayout>
 </template>
 <script setup>
+import { usePathStore } from '../stores/header.js'
+import { storeToRefs } from 'pinia'
+
+const pathStore = usePathStore()
+const {path} =storeToRefs(pathStore)
+
+const route = useRoute()
+path.value = route.name
+
 const axios = inject('axios')
 definePageMeta({
   layout: false,

@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[85px] flex items-center justify-between nav">
+  <nav class="h-[85px] flex items-center justify-between">
     <h1 class="ml-10 text-[28px]">Deeping Stock</h1>
     <ClientOnly>
       <vue3-simple-typeahead
@@ -25,28 +25,36 @@
       </vue3-simple-typeahead>
     </ClientOnly>
     <div>
-      <RouterLink
+      <nuxt-link
         to="/"
-        class="nav-a shadow focus:bg-[#063a34] focus:text-white"
-        >首頁</RouterLink
+        class="nav-a shadow"
+        :class="path==='index'?'bg-[#063a34] text-white':'' "
+        >首頁</nuxt-link
       >
-      <RouterLink
+      <nuxt-link
         to="/stockFilter"
-        class="nav-a shadow focus:bg-[#063a34] focus:text-white"
-        >股票篩選</RouterLink
+        class="nav-a shadow"
+        :class="path==='stockFilter'?'bg-[#063a34] text-white':'' "
+        >股票篩選</nuxt-link
       >
-      <RouterLink
+      <nuxt-link
         to="/hotMap"
-        class="nav-a shadow focus:bg-[#063a34] focus:text-white"
-        >股票熱區地圖</RouterLink
+        class="nav-a shadow"
+        :class="path==='hotMap'?'bg-[#063a34] text-white':'' "
+        >股票熱區地圖</nuxt-link
       >
     </div>
-  </div>
+  </nav>
   <slot name="main" />
 </template>
 <script setup>
-
 import axios from 'axios'
+import { usePathStore } from '../stores/header.js'
+import { storeToRefs } from 'pinia'
+
+// nav目前頁面顏色
+const pathStore = usePathStore()
+const {path} =storeToRefs(pathStore)
 
 const router = useRouter()
 
@@ -71,35 +79,35 @@ onMounted(async()=>{
   inputRef.value.selectCurrentSelection =()=>{}
 })
 
-
+// 點選預選框跳轉股票單頁
 const selectAddtItem = (item) => {
   searchStock.value = item
   searchToStock()
 }
 
-
+// 輸入文字時提供預選框data
 const onInputEventHandler = () => {
   axios.get(searchApi.value).then((res) => {
     checkData.value = res.data.map((v) => v.symbol)
   })
 }
 
+// 跳轉股票單頁
 const searchToStock = () => {
-  router.push(`/stocks/${searchStock.value}`)
+  router.push(`/stocks/${searchStock.value.toUpperCase()}`)
 }
 
 
 </script>
 <style lang="scss" scoped>
-.nav {
-  // background: linear-gradient(180deg, #80A0C6 0%, #D8E1EC 100%);
+nav {
   border-bottom: 1px solid rgb(214, 214, 214);
   box-shadow: 5px 5px 20px 10px rgba(181, 181, 181, 0.25);
 }
 h1 {
   color: #063a34;
   font-weight: 900;
-  // text-shadow: 2px 2px 0px #a2c8c4;
+  text-shadow: 2px 2px 0px #a2c8c4;
   // text-shadow: 1px 1px 0px #063a34;
 }
 :deep(.simple-typeahead) {
@@ -112,10 +120,6 @@ h1 {
   border: 0.1rem solid black !important;
 }
 
-// :deep(.simple-typeahead-list-item-text) {
-//     color: red;
-//     font-size: 30px !important;
-// }
 :deep(.simple-typeahead-list-item) {
   background-color: white !important;
 }
