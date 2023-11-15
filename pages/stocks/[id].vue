@@ -185,18 +185,6 @@ const getFirstChart = axios.get(stockChartApi)
 
 // 股票基本資料
 const stockData = ref()
-const wantDelete = [
-  'exchange',
-  'zip',
-  'dcfDiff',
-  'dcf',
-  'image',
-  'defaultImage',
-  'isEtf',
-  'isActivelyTrading',
-  'isAdr',
-  'isFund',
-]
 
 // 股票圖表資料
 const stockChart = ref()
@@ -247,7 +235,6 @@ const getData = async () => {
         }) => rest
       )
       stockData.value = stockData.value[0]
-      console.log(stockData.value)
     })
     .catch((rej) => {
       console.log(rej)
@@ -322,7 +309,7 @@ const chartOptions = computed(() => {
           'typeChange',
           'separator',
           'currentPriceIndicator',
-        ], // 這是預設的按鈕列表，你可以根據需要進行調整
+        ], 
       },
     },
     series: [
@@ -406,7 +393,7 @@ const stockChartFix = computed(() => {
   return fix(stockChartRev.value)
 })
 
-// 增加&刪減股票
+// 股票績效相關
 
 const searchAdd = ref(false)
 const checkData = ref([])
@@ -439,10 +426,6 @@ const selectAddtItem = (item) => {
   changeChart('add')
 }
 
-const selectRemoveItem = (item) => {
-  searchRemoveStock.value = item
-}
-
 const onInputEventHandler = () => {
   axios.get(searchApi.value).then((res) => {
     checkData.value = res.data.map((v) => v.symbol)
@@ -458,15 +441,15 @@ const cancelsel = async () =>{
   inputRef.value.selectCurrentSelection =()=>{}
 }
 
+//增加&刪減股票
+
 const changeChart = async (change, stock) => {
   if (change === 'add') {
     let newChart = []
     await axios
       .get(addChartApi.value)
       .then((res) => {
-        console.log(res)
         newChart = res.data.historical
-        console.log(newChart)
       })
       .catch((rej) => {
         console.log(rej)
@@ -504,33 +487,7 @@ const chartOptionsMulti = computed(() => {
       height: 500,
     },
     // 預設選第五個選擇器(1y)
-    rangeSelector: {
-      // buttonTheme: { // styles for the buttons
-      //           fill: 'none',
-      //           stroke: 'none',
-      //           strokeWidth: 0,
-      //           r: 3,
-      //           width: 50,  // 设置按钮的宽度
-      //           height: 30, // 设置按钮的高度
-      //           style: {
-      //               color: '#284a6b',
-      //               fontWeight: 'bold',
-      //               lineWidth:5,
-      //               fontSize:'16px'
-      //           },
-      //           states: {
-      //               hover: {
-      //               },
-      //               select: {
-      //                   fill: '#284a6b',
-      //                   style: {
-      //                       color: 'white',
-      //                   }
-      //               }
-      //           // disabled: { ... }
-      //           }
-      //         },
-              
+    rangeSelector: {            
       selected: 4,
     },
     yAxis: {
@@ -595,7 +552,7 @@ const chartOptionsMulti = computed(() => {
           'separator',
           'currentPriceIndicator',
           'saveChart',
-        ], // 這是預設的按鈕列表，你可以根據需要進行調整
+        ], 
       },
     },
     series: MultiChart.value,
@@ -645,7 +602,6 @@ const translateKey = (key) => {
   return translations[key] || key
 }
 
-// 進度條
 useProgressDone(ohlc)
 
 </script>
@@ -653,25 +609,19 @@ useProgressDone(ohlc)
 .stockborder {
   border-top: 1px solid black;
 }
-.ttt {
+.testcolor {
   background-color: #f4ede2;
   background-color: #daeff2;
   background-color: #99d3e6;
   background-color: #6a8c94;
   background-color: #d5d8d4;
 }
-// --color_16: 218,239,242;
-// --color_26: 153,211,230;
-// --color_19: 106,140,148;
-// --color_31: 213,216,212;
-// --bg-overlay-color: rgb(244, 237, 226);
 
 :deep(.simple-typeahead){
   width: 60%;
 }
 
 :deep(.simple-typeahead-list) {
-  background-color: yellow;
   width: 98% !important;
   border: 0.1rem solid black !important;
 }
@@ -680,6 +630,7 @@ useProgressDone(ohlc)
 //     color: red;
 //     font-size: 30px !important;
 // }
+
 :deep(.simple-typeahead-list-item) {    
     background-color: white !important;
 }

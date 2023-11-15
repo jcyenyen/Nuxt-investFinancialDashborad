@@ -88,8 +88,8 @@
         </div>
       </div>
       <div class="w-[93%] mx-auto">
-        <el-table :data="stockResult" style="width: 100%" class="">
-          <el-table-column prop="symbol" label="股票代號" mid-width="100">
+        <el-table :data="stockResult" style="width: 100%" :default-sort="{ prop: 'marketCap', order: 'descending' }">
+          <el-table-column prop="symbol" label="股票代號" sortable mid-width="100">
             <template #default="scope">
               <div class="flex items-center">
                 <img
@@ -111,21 +111,21 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="companyName" label="公司名稱" width="200">
+          <el-table-column prop="companyName" label="公司名稱" sortable width="200">
             <template #default="scope">
               <p class="truncate">{{ scope.row.companyName }}</p>
             </template>
           </el-table-column>
-          <el-table-column prop="sector" label="產業" />
-          <el-table-column prop="industry" label="行業" width="200" />
-          <el-table-column prop="marketCap" label="市值" width="100">
+          <el-table-column prop="sector" label="產業" sortable/>
+          <el-table-column prop="industry" label="行業" width="200" sortable/>
+          <el-table-column prop="marketCap" label="市值" width="100" sortable>
             <template #default="scope">
               <p>
                 {{ numberTranslate(scope.row.marketCap) }}
               </p>
             </template>
           </el-table-column>
-          <el-table-column prop="price" label="股價" width="100">
+          <el-table-column prop="price" label="股價" width="100" sortable>
             <template #default="scope">
               <p
                 class="font-bold"
@@ -140,7 +140,7 @@
               </p>
             </template>
           </el-table-column>
-          <el-table-column prop="changesPercentage" label="股價漲跌幅">
+          <el-table-column prop="changesPercentage" label="股價漲跌幅" sortable>
             <template #default="scope">
               <p
                 v-if="scope.row.changesPercentage < 0"
@@ -159,7 +159,7 @@
               </p>
             </template>
           </el-table-column>
-          <el-table-column prop="volume" label="當日交易量">
+          <el-table-column prop="volume" label="當日交易量" sortable>
             <template #default="scope">
               <p>
                 {{ numberTranslate(scope.row.volume) }}
@@ -390,8 +390,6 @@ const getData = async () => {
   await axios
     .get(stockApi.value)
     .then((res) => {
-      console.log(res.data)
-      // split
       stockData.value = res.data
       total.value = Math.ceil(stockData.value.length / pageSize.value)
       // 資料傳一次就好 動頁籤篩選後面動
@@ -447,7 +445,6 @@ watchEffect(async () => {
     await axios
       .get(stockByChangeApi.value)
       .then((res) => {
-        console.log(res)
         stockByChange.value = res.data
       })
       .catch((rej) => {
@@ -484,18 +481,20 @@ const stockResult = computed(() => {
 const numberTranslate = (num) => {
   num = num.toString()
   const length = num.length
+  const numberSlice = (start,middle,end) =>{
+    const integer = num.slice(start, middle)
+    const decimal = num.slice(middle, end)
+    return {integer,decimal}
+  }
   if (length > 9) {
-    const integer = num.slice(0, length - 9)
-    const decimal = num.slice(length - 9, length - 7)
+    const {integer,decimal} = numberSlice(0, length - 9, length - 7)   
     num = `${integer}.${decimal}B`
   } else if (length > 6) {
-    const integer = num.slice(0, length - 6)
-    const decimal = num.slice(length - 6, length - 4)
+    const {integer,decimal} = numberSlice(0, length - 6, length - 4) 
     num = `${integer}.${decimal}M`
   } else if (length > 3) {
-    const integer1 = num.slice(0, length - 3)
-    const integer2 = num.slice(length - 3, length)
-    num = `${integer1},${integer2}`
+    const {integer,decimal} = numberSlice(0, length - 3, length)
+    num = `${integer},${decimal}`
   }
   return num
 }
@@ -512,7 +511,6 @@ const handleCurrentChange = (val) => {
   getData()
 }
 
-// 進度條
 useProgressDone(stockResult)
 
 </script>

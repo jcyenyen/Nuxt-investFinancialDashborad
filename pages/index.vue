@@ -219,11 +219,8 @@ const checkStockToNews = computed(() => {
   return stockToNewsString || ''
 })
 
-// 2023-11-01
-// 20231101T0000
 // 日期搜尋新聞
 
-console.log(dayjs('2023-11-01').minute(0).hour(0).format('YYYYMMDD[T]HHmm'))
 const timeStart = ref('')
 const timeEnd = ref('')
 const timeStartStr = computed(() => {
@@ -271,14 +268,12 @@ const activesStockApi = `https://financialmodelingprep.com/api/v3/stock_market/a
 
 const buttonApi = `https://financialmodelingprep.com/api/v3/quote-order/AAPL,GOOGL,META,TSLA?apikey=${fmp}`
 
-// 取得資料
 const getData = (stock = 'AAPL', company = 'Apple Inc.') => {
   // 按鈕更換股票
   designatedStock.value = stock
   axios
     .get(buttonApi)
     .then((res) => {
-      console.log(res.data)
       buttons.value = res.data
       return axios.get(dataApi.value)
     })
@@ -286,7 +281,6 @@ const getData = (stock = 'AAPL', company = 'Apple Inc.') => {
       data.value = Object.entries(res.data['Time Series (1min)']).map(
         ([date, values]) => ({ date, ...values })
       )
-      console.log(res)
       stockName.value = company
       return Promise.all([
         axios.get(gainersStockApi),
@@ -300,7 +294,6 @@ const getData = (stock = 'AAPL', company = 'Apple Inc.') => {
         v.data.length = 5
       })
       presenceStock.value = res
-      console.log(res)
       return axios.get(newsApi.value)
     })
     .then((res) => {
@@ -310,7 +303,6 @@ const getData = (stock = 'AAPL', company = 'Apple Inc.') => {
     .catch((err) => {
       console.log(err)
     })
-  console.log(stock)
 }
 
 onMounted(() => {
@@ -485,7 +477,6 @@ const chooseNews = () => {
   axios
     .get(newsApi.value)
     .then((res) => {
-      console.log(res)
       news.value = res.data.feed.length !== 0 ? res.data.feed : undefined
       if (news.value !== undefined) news.value.length = 20
     })
@@ -493,8 +484,6 @@ const chooseNews = () => {
       console.log(err)
     })
 }
-
-// 進度條
 
 useProgressDone(realTimeOffer)
 

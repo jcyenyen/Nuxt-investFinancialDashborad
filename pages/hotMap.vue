@@ -72,7 +72,6 @@ const technologyStock = computed(() => {
     total.push(...sectorFilter(v))
   })
   total = total.length ? total : []
-  console.log(total)
   return total
 })
 
@@ -80,7 +79,6 @@ const getData = async () => {
   await axios
     .get(softwareApi)
     .then((res) => {
-      console.log(res.data)
       stockData.value = res.data
     })
     .catch((rej) => {
@@ -186,7 +184,6 @@ watchEffect(async () => {
     await axios
       .get(stockByVolumeApi.value)
       .then((res) => {
-        console.log(res)
         stockByVolume.value = res.data
       })
       .catch((rej) => {
@@ -310,7 +307,6 @@ const chartOptions = computed(() => {
                   useHTML: true,
                   formatter: function () {
                     // 檢查框框的面積
-                    // console.log(this.point)
                     if (
                       this.point.shapeArgs.width / this.point.shapeArgs.height >
                         20 ||
@@ -377,10 +373,8 @@ const chartOptions = computed(() => {
                           '<h4 style="font-size:8px;text-align:center;display:none;">'
                         )
                     } else {
-                      // console.log(this.point)
                       return null // 不顯示 dataLabel
                     }
-                    // return this.point.name
                   },
                   enabled: true,
                   align: 'center', // 左對齊

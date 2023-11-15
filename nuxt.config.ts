@@ -10,6 +10,10 @@ export default defineNuxtConfig({
   },
   modules: [
     '@element-plus/nuxt',
-    'dayjs-nuxt'
-  ]
+    'dayjs-nuxt',
+    '@pinia/nuxt',
+  ],
+  plugins: [
+    { src: '~/plugins/nprogress.client.js', mode: 'client' } // 指定為client插件
+  ],
 })
