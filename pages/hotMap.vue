@@ -15,21 +15,19 @@
   </NuxtLayout>
 </template>
 <script setup>
-import { usePathStore } from '../stores/header.js'
+import { usePathStore } from '../stores/stock.js'
 import { storeToRefs } from 'pinia'
 
 const pathStore = usePathStore()
-const {path} =storeToRefs(pathStore)
+const { path } = storeToRefs(pathStore)
 
 const route = useRoute()
 path.value = route.name
-
 
 const axios = inject('axios')
 definePageMeta({
   layout: false,
 })
-
 
 // key
 const fmp = import.meta.env.VITE_KEY_FMP
@@ -40,12 +38,24 @@ const softwareApi = `https://financialmodelingprep.com/api/v3/stock-screener?mar
 
 // &industry=Infrastructure
 
-const sector = ['Consumer Electronics', 'Software—Infrastructure', 'Semiconductors', 'Semiconductor Equipment & Materials', 'Communication Equipment' ,'Software—Application' ,'Information Technology Services' ,'Solar', 'Scientific & Technical Instruments', 'Computer Hardware' ,'Electronic Components']
+const sector = [
+  'Consumer Electronics',
+  'Software—Infrastructure',
+  'Semiconductors',
+  'Semiconductor Equipment & Materials',
+  'Communication Equipment',
+  'Software—Application',
+  'Information Technology Services',
+  'Solar',
+  'Scientific & Technical Instruments',
+  'Computer Hardware',
+  'Electronic Components',
+]
 
 const stockData = ref()
 
 // 產業篩選
-const sectorFilter = (sector) =>{
+const sectorFilter = (sector) => {
   const data = stockData.value
     ? stockData.value.filter((v) => {
         return v.industry === sector
@@ -58,7 +68,7 @@ const sectorFilter = (sector) =>{
 // 產業篩為最多10個再組合
 const technologyStock = computed(() => {
   let total = []
-  sector.forEach((v)=>{
+  sector.forEach((v) => {
     total.push(...sectorFilter(v))
   })
   total = total.length ? total : []
@@ -188,8 +198,8 @@ watchEffect(async () => {
 const chartOptions = computed(() => {
   return chartData.value
     ? {
-        accessibility:{
-          enabled:false
+        accessibility: {
+          enabled: false,
         },
         chart: {
           height: '55%',
@@ -410,10 +420,10 @@ const chartOptions = computed(() => {
       }
     : undefined
 })
-
 </script>
 <style lang="scss" scoped>
 .box1 {
   background-color: #000000;
 }
 </style>
+../stores/stock.js

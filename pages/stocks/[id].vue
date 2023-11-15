@@ -160,12 +160,18 @@
 </template>
 <script setup>
 import axios from 'axios'
-import draggable from 'vuedraggable'
+import { usePathStore } from '../stores/stock.js'
+import { storeToRefs } from 'pinia'
 
-const dayjs = useDayjs()
+const pathStore = usePathStore()
+const { path } = storeToRefs(pathStore)
 
 const route = useRoute()
 const id = route.params.id
+path.value = route.name
+
+const dayjs = useDayjs()
+
 
 // key
 const fmp = import.meta.env.VITE_KEY_FMP

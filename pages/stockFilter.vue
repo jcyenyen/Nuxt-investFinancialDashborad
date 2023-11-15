@@ -184,11 +184,11 @@
   </NuxtLayout>
 </template>
 <script setup>
-import { usePathStore } from '../stores/header.js'
+import { usePathStore } from '../stores/stock.js'
 import { storeToRefs } from 'pinia'
 
 const pathStore = usePathStore()
-const {path} =storeToRefs(pathStore)
+const { path } = storeToRefs(pathStore)
 
 const route = useRoute()
 path.value = route.name
@@ -202,7 +202,7 @@ definePageMeta({
 const fmp = import.meta.env.VITE_KEY_FMP
 
 // 找相對的上限或下限
-const matchOption = (option,limit,choose)=>{
+const matchOption = (option, limit, choose) => {
   const match = option.find((v) => v.value === choose)
   return match ? match[limit] : ''
 }
@@ -211,18 +211,18 @@ const matchOption = (option,limit,choose)=>{
 
 const marketCap = ref('')
 const marketCapMore = computed(() => {
-  return matchOption(marketCapOption.value,'more',marketCap.value)
+  return matchOption(marketCapOption.value, 'more', marketCap.value)
 })
 const marketCapLower = computed(() => {
-  return matchOption(marketCapOption.value,'lower',marketCap.value)
+  return matchOption(marketCapOption.value, 'lower', marketCap.value)
 })
 
 const volume = ref('')
 const volumeMore = computed(() => {
-  return matchOption(volumeOption.value,'more',volume.value)
+  return matchOption(volumeOption.value, 'more', volume.value)
 })
 const volumeLower = computed(() => {
-  return matchOption(volumeOption.value,'lower',volume.value)
+  return matchOption(volumeOption.value, 'lower', volume.value)
 })
 
 const sector = ref('Technology')
@@ -230,26 +230,26 @@ const industry = ref('Software—Infrastructure')
 
 const dividend = ref('')
 const dividendMore = computed(() => {
-  return matchOption(dividendOption.value,'more',dividend.value)
+  return matchOption(dividendOption.value, 'more', dividend.value)
 })
 const dividendLower = computed(() => {
-  return matchOption(dividendOption.value,'lower',dividend.value)
+  return matchOption(dividendOption.value, 'lower', dividend.value)
 })
 
 const beta = ref('')
 const betaMore = computed(() => {
-  return matchOption(betaOption.value,'more',beta.value)
+  return matchOption(betaOption.value, 'more', beta.value)
 })
 const betaLower = computed(() => {
-  return matchOption(betaOption.value,'lower',beta.value)
+  return matchOption(betaOption.value, 'lower', beta.value)
 })
 
 const price = ref('')
 const priceMore = computed(() => {
-  return matchOption(priceOption.value,'more',price.value)
+  return matchOption(priceOption.value, 'more', price.value)
 })
 const priceLower = computed(() => {
-  return matchOption(priceOption.value,'lower',price.value)
+  return matchOption(priceOption.value, 'lower', price.value)
 })
 
 // 篩選的option
@@ -366,7 +366,6 @@ const stockApi = computed(
 
 // 產業的option
 const sectorApi = `https://financialmodelingprep.com/api/v3/sector-performance?apikey=${fmp}`
-
 
 // 行業的option
 const industryApi = `https://financialmodelingprep.com/api/v4/industry_price_earning_ratio?date=2023-10-10&exchange=NASDAQ&apikey=${fmp}`
@@ -532,3 +531,4 @@ const handleCurrentChange = (val) => {
   font-size: 18px;
 }
 </style>
+../stores/stock.js

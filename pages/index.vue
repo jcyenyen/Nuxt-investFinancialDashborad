@@ -1,8 +1,8 @@
 <template>
   <NuxtLayout name="header">
-    <template #main>
-      <div class="box">
-        <div
+    <template v-if="realTimeOffer" #main>
+      <div class="flex mx-auto my-4 p-6">
+        <button
           v-for="v in buttons"
           class="flex items-center btn-primary shadows sticky w-[24%]"
           @click="getData(v.symbol, v.name)"
@@ -15,7 +15,7 @@
           <div>
             <nuxt-link
               :to="`/stocks/${v.symbol}`"
-              class="text-[24px] font-bold"
+              class="text-[24px] font-bold hover:text-[#4279af]"
               @click.self="router.push(`/stocks/${v.symbol}`)"
             >
               {{ v.name }}
@@ -38,7 +38,7 @@
               </p>
             </div>
           </div>
-        </div>
+        </button>
       </div>
       <ClientOnly>
         <highcharts
@@ -51,9 +51,9 @@
       <template v-if="presenceStock">
         <div v-for="Ranking in presenceStock" class="py-10">
           <h3 class="text-center font-bold text-2xl mb-[40px]">
-            {{rankingJudge(Ranking.config.url)}}
+            {{ rankingJudge(Ranking.config.url) }}
           </h3>
-          <ul class="flex flex-wrap justify-around">
+          <ul class="flex flex-wrap justify-between w-[95%] mx-auto">
             <li v-for="v in Ranking.data" :key="v.name" class="racebox">
               <div class="flex items-center">
                 <img
@@ -62,17 +62,20 @@
                   :class="v.name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''"
                   @error="onError"
                 />
-                <div>
+                <nuxt-link :to="`/stocks/${v.symbol}`" class="hover:text-[#4279af]">
                   <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
                   <p>{{ v.symbol }}</p>
-                </div>
+                </nuxt-link>
               </div>
               <div class="flex items-center">
                 <p class="font-bold me-5">
                   {{ `${twoAfterDecimal(v.price)}`
                   }}<span class="font-normal text-[10px] ms-1">USD</span>
                 </p>
-                <p class="percent text-center" :class="rankingJudge(Ranking.config.url,'color')">
+                <p
+                  class="percent text-center"
+                  :class="rankingJudge(Ranking.config.url, 'color')"
+                >
                   {{ `+${twoAfterDecimal(v.changesPercentage)}%` }}
                 </p>
               </div>
@@ -160,11 +163,14 @@
 <script setup>
 import charts from 'highcharts'
 import { useRouter } from 'vue-router'
-import { usePathStore } from '../stores/header.js'
+import { usePathStore } from '../stores/stock.js'
 import { storeToRefs } from 'pinia'
+import Nprogress from 'nprogress'
+import 'nprogress/nprogress.css'
+
 
 const pathStore = usePathStore()
-const {path} =storeToRefs(pathStore)
+const { path } = storeToRefs(pathStore)
 
 const route = useRoute()
 path.value = route.name
@@ -215,7 +221,7 @@ const checkStockToNews = computed(() => {
   return stockToNewsString || ''
 })
 
-// 2023-11-01 
+// 2023-11-01
 // 20231101T0000
 // 日期搜尋新聞
 
@@ -226,12 +232,14 @@ const timeStartStr = computed(() => {
   timeStart.value = timeStart.value
     ? dayjs(timeStart.value).minute(0).hour(0).format('YYYYMMDD[T]HHmm')
     : ''
-  
+
   return timeStart.value
 })
 
 const timeEndStr = computed(() => {
-  timeEnd.value = timeEnd.value ? dayjs(timeEnd.value).minute(59).hour(23).format('YYYYMMDD[T]HHmm'): ''
+  timeEnd.value = timeEnd.value
+    ? dayjs(timeEnd.value).minute(59).hour(23).format('YYYYMMDD[T]HHmm')
+    : ''
   return timeEnd.value
 })
 
@@ -263,7 +271,6 @@ const gainersStockApi = `https://financialmodelingprep.com/api/v3/stock_market/g
 const losersStockApi = `https://financialmodelingprep.com/api/v3/stock_market/losers?apikey=${fmp}`
 const activesStockApi = `https://financialmodelingprep.com/api/v3/stock_market/actives?apikey=${fmp}`
 
-
 const buttonApi = `https://financialmodelingprep.com/api/v3/quote-order/AAPL,GOOGL,META,TSLA?apikey=${fmp}`
 
 // 取得資料
@@ -291,8 +298,8 @@ const getData = (stock = 'AAPL', company = 'Apple Inc.') => {
     })
     .then((res) => {
       // 限制排名5筆
-      res.forEach((v)=>{
-        v.data.length=5
+      res.forEach((v) => {
+        v.data.length = 5
       })
       presenceStock.value = res
       console.log(res)
@@ -316,7 +323,7 @@ onMounted(() => {
 const realTimeOffer = computed(() => {
   return data.value
     ? data.value.reverse().map((v) => {
-        const timeStamp = +dayjs(v.date) 
+        const timeStamp = +dayjs(v.date)
         return [timeStamp, parseFloat(v['2. high'])]
       })
     : undefined
@@ -464,13 +471,13 @@ const chartOptions = computed(() => {
 
 // 判斷上漲下跌活躍顏色
 
-const rankingJudge=(kind,type)=>{
-  if(kind.includes('gainer')){
-    return type === 'color'?'':'當日上漲股票排名'
-  }else if(kind.includes('loser')){
-    return type === 'color'?'bg-[#ff0000]':'當日下跌股票排名'
-  } else if(kind.includes('active')){
-    return type === 'color'?'bg-zinc-700':'當日活躍股票排名'
+const rankingJudge = (kind, type) => {
+  if (kind.includes('gainer')) {
+    return type === 'color' ? '' : '當日上漲股票排名'
+  } else if (kind.includes('loser')) {
+    return type === 'color' ? 'bg-[#ff0000]' : '當日下跌股票排名'
+  } else if (kind.includes('active')) {
+    return type === 'color' ? 'bg-zinc-700' : '當日活躍股票排名'
   }
 }
 
@@ -489,6 +496,14 @@ const chooseNews = () => {
       console.log(err)
     })
 }
+
+// 進度條
+
+Nprogress.configure({ showSpinner: false, ease: 'ease', speed: 500 })
+
+watchEffect(() => {
+  realTimeOffer.value?Nprogress.done():Nprogress.start()
+});
 </script>
 <style lang="scss" scoped>
 .racebox:nth-child(2) {
@@ -513,4 +528,10 @@ const chooseNews = () => {
   letter-spacing: 0.3em;
   font-size: 3em;
 }
+
+.testtt {
+  background-color: #16b7a5;
+  background-color: #4279af
+}
 </style>
+

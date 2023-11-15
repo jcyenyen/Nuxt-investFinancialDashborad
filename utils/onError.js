@@ -5,3 +5,5 @@ const onError = (event) => {
     // event.target.style.display = 'none';
     event.target.src = '/FTNT.png'
 }
+
+export default onError

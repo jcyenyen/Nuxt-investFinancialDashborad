@@ -1,6 +1,6 @@
 <template>
   <nav class="h-[85px] flex items-center justify-between">
-    <h1 class="ml-10 text-[28px]">Deeping Stock</h1>
+    <nuxt-link to="/" class="logo ml-10 text-[28px]">Deeping Stock</nuxt-link>
     <ClientOnly>
       <vue3-simple-typeahead
         ref="inputRef"
@@ -17,7 +17,6 @@
         <template #list-item-text="slot">
           <div class="">
             <span
-              @keydown.native.enter.prevent="dontDOit"
               v-html="slot.boldMatchText(slot.itemProjection(slot.item))"
             ></span>
           </div>
@@ -28,19 +27,19 @@
       <nuxt-link
         to="/"
         class="nav-a shadow"
-        :class="path==='index'?'bg-[#063a34] text-white':'' "
+        :class="path === 'index' ? 'bg-[#063a34] text-white' : ''"
         >首頁</nuxt-link
       >
       <nuxt-link
         to="/stockFilter"
         class="nav-a shadow"
-        :class="path==='stockFilter'?'bg-[#063a34] text-white':'' "
+        :class="path === 'stockFilter' ? 'bg-[#063a34] text-white' : ''"
         >股票篩選</nuxt-link
       >
       <nuxt-link
         to="/hotMap"
         class="nav-a shadow"
-        :class="path==='hotMap'?'bg-[#063a34] text-white':'' "
+        :class="path === 'hotMap' ? 'bg-[#063a34] text-white' : ''"
         >股票熱區地圖</nuxt-link
       >
     </div>
@@ -49,12 +48,12 @@
 </template>
 <script setup>
 import axios from 'axios'
-import { usePathStore } from '../stores/header.js'
+import { usePathStore } from '../stores/stock.js'
 import { storeToRefs } from 'pinia'
 
 // nav目前頁面顏色
 const pathStore = usePathStore()
-const {path} =storeToRefs(pathStore)
+const { path } = storeToRefs(pathStore)
 
 const router = useRouter()
 
@@ -74,9 +73,9 @@ const inputRef = ref()
 
 //取消搜尋框enter預設
 
-onMounted(async()=>{
+onMounted(async () => {
   await nextTick()
-  inputRef.value.selectCurrentSelection =()=>{}
+  inputRef.value.selectCurrentSelection = () => {}
 })
 
 // 點選預選框跳轉股票單頁
@@ -96,15 +95,13 @@ const onInputEventHandler = () => {
 const searchToStock = () => {
   router.push(`/stocks/${searchStock.value.toUpperCase()}`)
 }
-
-
 </script>
 <style lang="scss" scoped>
 nav {
   border-bottom: 1px solid rgb(214, 214, 214);
   box-shadow: 5px 5px 20px 10px rgba(181, 181, 181, 0.25);
 }
-h1 {
+.logo {
   color: #063a34;
   font-weight: 900;
   text-shadow: 2px 2px 0px #a2c8c4;
@@ -124,3 +121,4 @@ h1 {
   background-color: white !important;
 }
 </style>
+

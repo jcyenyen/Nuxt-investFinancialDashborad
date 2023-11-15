@@ -40,21 +40,15 @@ td {
 }
 
 @layer components {
-  .box {
-      @apply w-[100%] mx-auto my-4 p-6 max-[600px]:bg-sky-300 flex 
-  }
   .btn-primary {
-    @apply rounded bg-white text-[16px] m-4 p-2 hover:shadow 
+    @apply rounded bg-white text-[16px] m-4 p-2 hover:shadow focus:shadow
   }
   .nav-a {
     @apply m-4 p-2  bg-white rounded font-bold text-xl 
   }
   .shadows {   
-    box-shadow: 3px 5px 0px 0px rgba(181, 181, 181, 0.25);
+    box-shadow: 5px 5px 0px 0px rgba(181, 181, 181, 0.25);
     /* box-shadow: 0px 8px 10px -6px rgba(181, 181, 181, 0.25); */
-  }
-  .presence { 
-    @apply w-[220px] h-[80px] rounded my-4 
   }
   .racebox {
     @apply shadow-xl mb-10 inline-block rounded flex justify-between items-center box-border p-3 pb-1 hover:bg-gray-100
