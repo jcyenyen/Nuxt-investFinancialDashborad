@@ -420,6 +420,8 @@ const chartOptions = computed(() => {
       }
     : undefined
 })
+
+useProgressDone(chartOptions)
 </script>
 <style lang="scss" scoped>
 .box1 {

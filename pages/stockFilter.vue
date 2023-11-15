@@ -1,6 +1,6 @@
 <template>
   <NuxtLayout name="header">
-    <template #main>
+    <template v-if="stockResult" #main>
       <div class="w-[100%] mx-auto mt-5 mb-10 py-10 flex flex-wrap">
         <div class="my-1 w-[24%] flex justify-end items-center">
           <label for="marketCap" class="font-bold text-[16px]">市值</label>
@@ -511,6 +511,10 @@ const handleCurrentChange = (val) => {
   page.value = val
   getData()
 }
+
+// 進度條
+useProgressDone(stockResult)
+
 </script>
 <style lang="scss" scoped>
 .box1 {

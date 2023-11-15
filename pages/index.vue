@@ -165,8 +165,6 @@ import charts from 'highcharts'
 import { useRouter } from 'vue-router'
 import { usePathStore } from '../stores/stock.js'
 import { storeToRefs } from 'pinia'
-import Nprogress from 'nprogress'
-import 'nprogress/nprogress.css'
 
 
 const pathStore = usePathStore()
@@ -484,7 +482,6 @@ const rankingJudge = (kind, type) => {
 // 選擇新聞類型
 
 const chooseNews = () => {
-  console.log(realTimeOffer.value)
   axios
     .get(newsApi.value)
     .then((res) => {
@@ -499,11 +496,8 @@ const chooseNews = () => {
 
 // 進度條
 
-Nprogress.configure({ showSpinner: false, ease: 'ease', speed: 500 })
+useProgressDone(realTimeOffer)
 
-watchEffect(() => {
-  realTimeOffer.value?Nprogress.done():Nprogress.start()
-});
 </script>
 <style lang="scss" scoped>
 .racebox:nth-child(2) {

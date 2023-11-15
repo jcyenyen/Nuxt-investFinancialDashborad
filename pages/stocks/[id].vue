@@ -1,6 +1,6 @@
 <template>
   <NuxtLayout name="header">
-    <template #main>
+    <template v-if="ohlc" #main>
       <div
         v-if="ohlc.length !== 0"
         class="w-[95%] mt-3 mx-auto flex justify-between"
@@ -211,7 +211,7 @@ const ohlc = computed(() => {
         const timeStamp = +dayjs(v.date) 
         return [timeStamp, v.open, v.high, v.low, v.close]
       })
-    : []
+    : undefined
   return data
 })
 
@@ -644,6 +644,9 @@ const translateKey = (key) => {
   }
   return translations[key] || key
 }
+
+// 進度條
+useProgressDone(ohlc)
 
 </script>
 <style lang="scss" scoped>
