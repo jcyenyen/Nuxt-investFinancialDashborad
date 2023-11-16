@@ -485,7 +485,7 @@ const chooseNews = () => {
     })
 }
 
-useProgressDone(realTimeOffer)
+progressDone(realTimeOffer)
 
 </script>
 <style lang="scss" scoped>

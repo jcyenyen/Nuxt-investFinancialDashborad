@@ -415,7 +415,7 @@ const chartOptions = computed(() => {
     : undefined
 })
 
-useProgressDone(chartOptions)
+progressDone(chartOptions)
 </script>
 <style lang="scss" scoped>
 .box1 {

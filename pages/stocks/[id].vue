@@ -602,7 +602,7 @@ const translateKey = (key) => {
   return translations[key] || key
 }
 
-useProgressDone(ohlc)
+progressDone(ohlc)
 
 </script>
 <style lang="scss" scoped>
