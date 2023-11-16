@@ -88,8 +88,17 @@
         </div>
       </div>
       <div class="w-[93%] mx-auto">
-        <el-table :data="stockResult" style="width: 100%" :default-sort="{ prop: 'marketCap', order: 'descending' }">
-          <el-table-column prop="symbol" label="股票代號" sortable mid-width="100">
+        <el-table
+          :data="stockResult"
+          style="width: 100%"
+          :default-sort="{ prop: 'marketCap', order: 'descending' }"
+        >
+          <el-table-column
+            prop="symbol"
+            label="股票代號"
+            sortable
+            mid-width="100"
+          >
             <template #default="scope">
               <div class="flex items-center">
                 <img
@@ -111,7 +120,12 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="companyName" label="公司名稱" sortable width="200">
+          <el-table-column
+            prop="companyName"
+            label="公司名稱"
+            sortable
+            width="200"
+          >
             <template #default="scope">
               <p class="truncate">{{ scope.row.companyName }}</p>
             </template>
@@ -511,8 +525,7 @@ const handleCurrentChange = (val) => {
   getData()
 }
 
-useProgressDone(stockResult)
-
+progressDone(stockResult)
 </script>
 <style lang="scss" scoped>
 .box1 {
