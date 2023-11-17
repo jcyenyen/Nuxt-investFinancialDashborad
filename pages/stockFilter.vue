@@ -130,8 +130,8 @@
               <p class="truncate">{{ scope.row.companyName }}</p>
             </template>
           </el-table-column>
-          <el-table-column prop="sector" label="產業" sortable/>
-          <el-table-column prop="industry" label="行業" width="200" sortable/>
+          <el-table-column prop="sector" label="產業" sortable />
+          <el-table-column prop="industry" label="行業" width="200" sortable />
           <el-table-column prop="marketCap" label="市值" width="100" sortable>
             <template #default="scope">
               <p>
@@ -198,19 +198,20 @@
   </NuxtLayout>
 </template>
 <script setup>
+import axios from 'axios'
 import { usePathStore } from '../stores/stock.js'
 import { storeToRefs } from 'pinia'
 
+definePageMeta({
+  layout: false,
+})
+
+// 所在頁面 header按鈕顯示顏色
 const pathStore = usePathStore()
 const { path } = storeToRefs(pathStore)
 
 const route = useRoute()
 path.value = route.name
-
-const axios = inject('axios')
-definePageMeta({
-  layout: false,
-})
 
 // key
 const fmp = import.meta.env.VITE_KEY_FMP
@@ -384,11 +385,9 @@ const sectorApi = `https://financialmodelingprep.com/api/v3/sector-performance?a
 // 行業的option
 const industryApi = `https://financialmodelingprep.com/api/v4/industry_price_earning_ratio?date=2023-10-10&exchange=NASDAQ&apikey=${fmp}`
 
-// const getStockApi = axios.get(stockApi)
-// const getSectorApi = axios.get(sectorApi)
-// const getIndustryApi = axios.get(industryApi)
-
-// Promise.all[getStockApi,getSectorApi,getIndustryApi]
+const getStockApi = axios.get(stockApi.value)
+const getSectorApi = axios.get(sectorApi)
+const getIndustryApi = axios.get(industryApi)
 
 // 篩選後的股票(不含漲跌幅)
 
@@ -400,34 +399,21 @@ const page = ref(1)
 const total = ref()
 const pageSize = ref(30)
 
-const getData = async () => {
-  await axios
-    .get(stockApi.value)
+const getData = () => {
+  Promise.all([getStockApi, getSectorApi, getIndustryApi])
     .then((res) => {
-      stockData.value = res.data
-      total.value = Math.ceil(stockData.value.length / pageSize.value)
       // 資料傳一次就好 動頁籤篩選後面動
-    })
-    .catch((rej) => {
-      console.log(rej)
-    })
-  await axios
-    .get(sectorApi)
-    .then((res) => {
-      sectorOption.value = res.data.map((v) => {
+      stockData.value = res[0].data
+      total.value = Math.ceil(stockData.value.length / pageSize.value)
+
+      sectorOption.value = res[1].data.map((v) => {
         if (v.sector === 'Information Technology') {
           v.sector = 'Technology'
         }
         return v
       })
-    })
-    .catch((rej) => {
-      console.log(rej)
-    })
-  await axios
-    .get(industryApi)
-    .then((res) => {
-      industryOption.value = res.data
+
+      industryOption.value = res[2].data
     })
     .catch((rej) => {
       console.log(rej)
@@ -447,11 +433,12 @@ const stockName = computed(() => {
   return data
 })
 
-// 含漲跌幅的股票
+// 含漲跌幅的api
 const stockByChangeApi = computed(() => {
   return `https://financialmodelingprep.com/api/v3/quote/${stockName.value}?apikey=${fmp}`
 })
 
+// 漲跌幅
 const stockByChange = ref([])
 
 watchEffect(async () => {
@@ -495,19 +482,19 @@ const stockResult = computed(() => {
 const numberTranslate = (num) => {
   num = num.toString()
   const length = num.length
-  const numberSlice = (start,middle,end) =>{
+  const numberSlice = (start, middle, end) => {
     const integer = num.slice(start, middle)
     const decimal = num.slice(middle, end)
-    return {integer,decimal}
+    return { integer, decimal }
   }
   if (length > 9) {
-    const {integer,decimal} = numberSlice(0, length - 9, length - 7)   
+    const { integer, decimal } = numberSlice(0, length - 9, length - 7)
     num = `${integer}.${decimal}B`
   } else if (length > 6) {
-    const {integer,decimal} = numberSlice(0, length - 6, length - 4) 
+    const { integer, decimal } = numberSlice(0, length - 6, length - 4)
     num = `${integer}.${decimal}M`
   } else if (length > 3) {
-    const {integer,decimal} = numberSlice(0, length - 3, length)
+    const { integer, decimal } = numberSlice(0, length - 3, length)
     num = `${integer},${decimal}`
   }
   return num

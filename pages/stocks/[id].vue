@@ -163,14 +163,17 @@ import axios from 'axios'
 import { usePathStore } from '../stores/stock.js'
 import { storeToRefs } from 'pinia'
 
+const dayjs = useDayjs()
+
+// 所在頁面 header按鈕顯示顏色
 const pathStore = usePathStore()
 const { path } = storeToRefs(pathStore)
 
 const route = useRoute()
-const id = route.params.id
 path.value = route.name
 
-const dayjs = useDayjs()
+const id = route.params.id
+
 
 
 // key
@@ -186,7 +189,7 @@ const getFirstChart = axios.get(stockChartApi)
 // 股票基本資料
 const stockData = ref()
 
-// 股票圖表資料
+// 股票技術線圖
 const stockChart = ref()
 
 const stockChartRev = computed(() =>
@@ -245,7 +248,7 @@ onMounted(() => {
   getData()
 })
 
-// 單支股票
+// 技術線圖設定
 const chartOptions = computed(() => {
   return {
     chart: {
@@ -342,11 +345,11 @@ const chartOptions = computed(() => {
   }
 })
 
-// 技術指標
+// 技術指標方法
 const overlaysChoose = ref()
 const OscillatorChoose = ref()
 
-// 股票圖表建立後可用的內建function
+// 取出highChartStock元件方法
 const afterChartInit = (chart) => {
   // 更換覆蓋指標
   const overlays = (e) => {
@@ -378,7 +381,8 @@ const afterChartInit = (chart) => {
   OscillatorChoose.value = oscillator
 }
 
-// 多支股票
+// 股票績效比較
+
 const fix = (stock) => {
   const data = stock
     ? stock.map((v) => {
@@ -413,19 +417,24 @@ watchEffect(() => {
     : []
 })
 
+// 預先輸入框資料10筆
+
 const searchApi = computed(() => {
   return `https://financialmodelingprep.com/api/v3/search?query=${searchAddStock.value}&limit=10&exchange=NASDAQ&apikey=${fmp}`
 })
 
+// 新增績效股票api
 const addChartApi = computed(() => {
   return `https://financialmodelingprep.com/api/v3/historical-price-full/${searchAddStock.value}?timeseries=365&apikey=${fmp}`
 })
 
+// 點選預選框新增股票
 const selectAddtItem = (item) => {
   searchAddStock.value = item
   changeChart('add')
 }
 
+// 輸入文字時提供預選框data
 const onInputEventHandler = () => {
   axios.get(searchApi.value).then((res) => {
     checkData.value = res.data.map((v) => v.symbol)

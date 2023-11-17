@@ -15,19 +15,20 @@
   </NuxtLayout>
 </template>
 <script setup>
+import axios from 'axios'
 import { usePathStore } from '../stores/stock.js'
 import { storeToRefs } from 'pinia'
 
+definePageMeta({
+  layout: false,
+})
+
+// 所在頁面 header按鈕顯示顏色
 const pathStore = usePathStore()
 const { path } = storeToRefs(pathStore)
 
 const route = useRoute()
 path.value = route.name
-
-const axios = inject('axios')
-definePageMeta({
-  layout: false,
-})
 
 // key
 const fmp = import.meta.env.VITE_KEY_FMP
@@ -65,7 +66,7 @@ const sectorFilter = (sector) => {
   return data
 }
 
-// 產業篩為最多10個再組合
+// 各產業篩為最多10個再組合
 const technologyStock = computed(() => {
   let total = []
   sector.forEach((v) => {
@@ -86,6 +87,7 @@ const getData = async () => {
     })
 }
 
+// 篩選後股票代號連接成字串
 const stockName = computed(() => {
   const data =
     technologyStock.value.length !== 0
@@ -98,12 +100,14 @@ onMounted(() => {
   getData()
 })
 
+// 做圖表所需股票資料的api
 const stockByVolumeApi = computed(() => {
   return `https://financialmodelingprep.com/api/v3/quote/${stockName.value}?apikey=${fmp}`
 })
 
 const stockByVolume = ref([])
 
+// 加入行業產業
 const stockFullData = computed(() => {
   const data =
     stockByVolume.value.length !== 0
@@ -123,6 +127,7 @@ const stockFullData = computed(() => {
 
 // 最終圖表顯示data
 const chartData = computed(() => {
+  //底層
   const data = stockFullData.value
     ? stockFullData.value.map((v) => {
         return {
@@ -192,6 +197,7 @@ watchEffect(async () => {
   }
 })
 
+// 熱區地圖
 const chartOptions = computed(() => {
   return chartData.value
     ? {
