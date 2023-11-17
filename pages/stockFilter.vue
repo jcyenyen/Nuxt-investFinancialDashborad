@@ -533,4 +533,4 @@ progressDone(stockResult)
   font-size: 18px;
 }
 </style>
-../stores/stock.js
+
