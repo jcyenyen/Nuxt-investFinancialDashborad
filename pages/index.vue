@@ -62,7 +62,10 @@
                   :class="v.name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''"
                   @error="onError"
                 />
-                <nuxt-link :to="`/stocks/${v.symbol}`" class="hover:text-[#4279af]">
+                <nuxt-link
+                  :to="`/stocks/${v.symbol}`"
+                  class="hover:text-[#4279af]"
+                >
                   <h4 class="text-[16px] font-bold">{{ v.name }}</h4>
                   <p>{{ v.symbol }}</p>
                 </nuxt-link>
@@ -76,7 +79,7 @@
                   class="percent text-center"
                   :class="rankingJudge(Ranking.config.url, 'color')"
                 >
-                  {{ `+${twoAfterDecimal(v.changesPercentage)}%` }}
+                  {{ v.changesPercentage<0?`${twoAfterDecimal(v.changesPercentage)}%`:`+${twoAfterDecimal(v.changesPercentage)}%`}}
                 </p>
               </div>
             </li>
@@ -116,9 +119,9 @@
             />
           </div>
           <label class="font-bold text-[18px]">主題</label>
-          <div v-for="(v, name) in items" :key="v" class="mt-1">
-            <input type="checkbox" :value="name" v-model="checkedNews" />
-            <label class="font-bold text-[14px] m-2 py-2">{{ v }}</label>
+          <div v-for="(zh, eng) in newsFilter" :key="eng" class="mt-1">
+            <input type="checkbox" :value="eng" v-model="checkedNews" />
+            <label class="font-bold text-[14px] m-2 py-2">{{ zh }}</label>
           </div>
           <button
             @click="chooseNews"
@@ -161,29 +164,33 @@
   </NuxtLayout>
 </template>
 <script setup>
+import axios from 'axios'
 import charts from 'highcharts'
 import { useRouter } from 'vue-router'
 import { usePathStore } from '../stores/stock.js'
 import { storeToRefs } from 'pinia'
 
+definePageMeta({
+  layout: false,
+})
 
+const router = useRouter()
+const dayjs = useDayjs()
+
+// 所在頁面 header按鈕顯示顏色
 const pathStore = usePathStore()
 const { path } = storeToRefs(pathStore)
 
 const route = useRoute()
 path.value = route.name
 
-const dayjs = useDayjs()
-
-const axios = inject('axios')
-definePageMeta({
-  layout: false,
-})
-
-const router = useRouter()
-
 // 股票資料
 const data = ref()
+const dataTidy = computed(()=>{
+  const tidy =data.value? Object.entries(data.value['Time Series (1min)']).map(
+      ([date, values]) => ({ date, ...values })):undefined
+  return tidy
+})
 const designatedStock = ref('AAPL')
 const buttons = ref()
 
@@ -191,7 +198,7 @@ const buttons = ref()
 const news = ref()
 const checkedNews = ref([])
 const checkedNewsString = computed(() => checkedNews.value.join(','))
-const items = ref({
+const newsFilter = ref({
   blockchain: '區塊鏈',
   earnings: '收益',
   ipo: 'IPO',
@@ -210,6 +217,7 @@ const items = ref({
 })
 
 // 股票代號搜尋新聞
+
 const stockToNews = ref('')
 const checkStockToNews = computed(() => {
   const stockToNewsArr = stockToNews.value
@@ -247,14 +255,14 @@ watchEffect(() => {
 })
 
 // 當日股票排名
-const presenceStock = ref()
+const presenceStock = ref([])
 
 // KEY
 const alpha = import.meta.env.VITE_KEY_ALPHA
 const fmp = import.meta.env.VITE_KEY_FMP
 
 // API
-const dataApi = computed(() => {
+const stockDataApi = computed(() => {
   return `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${designatedStock.value}&interval=1min&outputsize=full&apikey=${alpha}`
 })
 const newsApi = computed(
@@ -268,41 +276,36 @@ const activesStockApi = `https://financialmodelingprep.com/api/v3/stock_market/a
 
 const buttonApi = `https://financialmodelingprep.com/api/v3/quote-order/AAPL,GOOGL,META,TSLA?apikey=${fmp}`
 
+const getButton = axios.get(buttonApi)
+const getStockData = axios.get(stockDataApi.value)
+const getGainersStock = axios.get(gainersStockApi)
+const getlosersStock = axios.get(losersStockApi)
+const getActivesStock = axios.get(activesStockApi)
+const getNews = axios.get(newsApi.value)
+
 const getData = (stock = 'AAPL', company = 'Apple Inc.') => {
   // 按鈕更換股票
   designatedStock.value = stock
-  axios
-    .get(buttonApi)
-    .then((res) => {
-      buttons.value = res.data
-      return axios.get(dataApi.value)
-    })
-    .then((res) => {
-      data.value = Object.entries(res.data['Time Series (1min)']).map(
-        ([date, values]) => ({ date, ...values })
-      )
-      stockName.value = company
-      return Promise.all([
-        axios.get(gainersStockApi),
-        axios.get(losersStockApi),
-        axios.get(activesStockApi),
-      ])
-    })
-    .then((res) => {
-      // 限制排名5筆
-      res.forEach((v) => {
+  Promise.all([
+    getButton,
+    getStockData,
+    getGainersStock,
+    getlosersStock,
+    getActivesStock,
+    getNews,
+  ]).then((res) => {
+    buttons.value = res[0].data
+    data.value = res[1].data
+    stockName.value = company
+    res.forEach((v, i) => {
+      if (i >= 2 && i <= 4) {
         v.data.length = 5
-      })
-      presenceStock.value = res
-      return axios.get(newsApi.value)
+        presenceStock.value.push(v)
+      }
     })
-    .then((res) => {
-      news.value = res.data.feed
-      news.value.length = 20
-    })
-    .catch((err) => {
-      console.log(err)
-    })
+    news.value = res[5].data.feed
+    news.value.length = 20
+  })
 }
 
 onMounted(() => {
@@ -311,8 +314,8 @@ onMounted(() => {
 
 // 將資料轉換成[時間,股價]
 const realTimeOffer = computed(() => {
-  return data.value
-    ? data.value.reverse().map((v) => {
+  return dataTidy.value
+    ? dataTidy.value.reverse().map((v) => {
         const timeStamp = +dayjs(v.date)
         return [timeStamp, parseFloat(v['2. high'])]
       })
@@ -327,7 +330,7 @@ const colorsOfUpsAndDowns = computed(() => {
   )
 })
 
-// 股票名稱
+// 股票圖表名稱
 const stockName = ref('')
 
 // 股票走勢設定
@@ -352,8 +355,8 @@ const chartOptions = computed(() => {
         fill: 'none',
         stroke: 'none',
         r: 3,
-        width: 50, // 设置按钮的宽度
-        height: 30, // 设置按钮的高度
+        width: 50,
+        height: 30,
         style: {
           color: '#284a6b',
           fontWeight: 'bold',
@@ -459,7 +462,7 @@ const chartOptions = computed(() => {
   }
 })
 
-// 判斷上漲下跌活躍顏色
+// 判斷上漲下跌活躍標題跟顏色
 
 const rankingJudge = (kind, type) => {
   if (kind.includes('gainer')) {
@@ -486,7 +489,6 @@ const chooseNews = () => {
 }
 
 progressDone(realTimeOffer)
-
 </script>
 <style lang="scss" scoped>
 .racebox:nth-child(2) {
@@ -514,7 +516,6 @@ progressDone(realTimeOffer)
 
 .testtt {
   background-color: #16b7a5;
-  background-color: #4279af
+  background-color: #4279af;
 }
 </style>
-
