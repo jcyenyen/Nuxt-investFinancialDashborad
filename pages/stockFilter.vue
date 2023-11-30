@@ -385,9 +385,13 @@ const sectorApi = `https://financialmodelingprep.com/api/v3/sector-performance?a
 // 行業的option
 const industryApi = `https://financialmodelingprep.com/api/v4/industry_price_earning_ratio?date=2023-10-10&exchange=NASDAQ&apikey=${fmp}`
 
-const getStockApi = axios.get(stockApi.value)
-const getSectorApi = axios.get(sectorApi)
-const getIndustryApi = axios.get(industryApi)
+const getDataApi = () => {
+  const getStockApi = axios.get(stockApi.value)
+  const getSectorApi = axios.get(sectorApi)
+  const getIndustryApi = axios.get(industryApi)
+
+  return [getStockApi, getSectorApi, getIndustryApi]
+}
 
 // 篩選後的股票(不含漲跌幅)
 
@@ -400,12 +404,11 @@ const total = ref()
 const pageSize = ref(30)
 
 const getData = () => {
-  Promise.all([getStockApi, getSectorApi, getIndustryApi])
+  Promise.all(getDataApi())
     .then((res) => {
       // 資料傳一次就好 動頁籤篩選後面動
       stockData.value = res[0].data
       total.value = Math.ceil(stockData.value.length / pageSize.value)
-
       sectorOption.value = res[1].data.map((v) => {
         if (v.sector === 'Information Technology') {
           v.sector = 'Technology'
@@ -443,14 +446,8 @@ const stockByChange = ref([])
 
 watchEffect(async () => {
   if (stockName.value) {
-    await axios
-      .get(stockByChangeApi.value)
-      .then((res) => {
-        stockByChange.value = res.data
-      })
-      .catch((rej) => {
-        console.log(rej)
-      })
+    const res = await axios.get(stockByChangeApi.value)
+    stockByChange.value = res.data
   }
 })
 
@@ -533,4 +530,3 @@ progressDone(stockResult)
   font-size: 18px;
 }
 </style>
-

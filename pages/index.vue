@@ -5,7 +5,7 @@
         <button
           v-for="v in buttons"
           class="flex items-center btn-primary shadows sticky w-[24%]"
-          @click="getData(v.symbol, v.name)"
+          @click="changeStock(v.symbol, v.name)"
         >
           <img
             :src="`https://financialmodelingprep.com/image-stock/${v.symbol.toUpperCase()}.png`"
@@ -79,7 +79,11 @@
                   class="percent text-center"
                   :class="rankingJudge(Ranking.config.url, 'color')"
                 >
-                  {{ v.changesPercentage<0?`${twoAfterDecimal(v.changesPercentage)}%`:`+${twoAfterDecimal(v.changesPercentage)}%`}}
+                  {{
+                    v.changesPercentage < 0
+                      ? `${twoAfterDecimal(v.changesPercentage)}%`
+                      : `+${twoAfterDecimal(v.changesPercentage)}%`
+                  }}
                 </p>
               </div>
             </li>
@@ -186,9 +190,12 @@ path.value = route.name
 
 // 股票資料
 const data = ref()
-const dataTidy = computed(()=>{
-  const tidy =data.value? Object.entries(data.value['Time Series (1min)']).map(
-      ([date, values]) => ({ date, ...values })):undefined
+const dataTidy = computed(() => {
+  const tidy = data.value
+    ? Object.entries(data.value['Time Series (1min)']).map(
+        ([date, values]) => ({ date, ...values })
+      )
+    : undefined
   return tidy
 })
 const designatedStock = ref('AAPL')
@@ -276,24 +283,27 @@ const activesStockApi = `https://financialmodelingprep.com/api/v3/stock_market/a
 
 const buttonApi = `https://financialmodelingprep.com/api/v3/quote-order/AAPL,GOOGL,META,TSLA?apikey=${fmp}`
 
-const getButton = axios.get(buttonApi)
-const getStockData = axios.get(stockDataApi.value)
-const getGainersStock = axios.get(gainersStockApi)
-const getlosersStock = axios.get(losersStockApi)
-const getActivesStock = axios.get(activesStockApi)
-const getNews = axios.get(newsApi.value)
-
-const getData = (stock = 'AAPL', company = 'Apple Inc.') => {
-  // 按鈕更換股票
-  designatedStock.value = stock
-  Promise.all([
+const getDataApi = () => {
+  const getButton = axios.get(buttonApi)
+  const getStockData = axios.get(stockDataApi.value)
+  const getGainersStock = axios.get(gainersStockApi)
+  const getlosersStock = axios.get(losersStockApi)
+  const getActivesStock = axios.get(activesStockApi)
+  const getNews = axios.get(newsApi.value)
+  return [
     getButton,
     getStockData,
     getGainersStock,
     getlosersStock,
     getActivesStock,
     getNews,
-  ]).then((res) => {
+  ]
+}
+
+const getData = (stock = 'AAPL', company = 'Apple Inc.') => {
+  // 按鈕更換股票
+  designatedStock.value = stock
+  Promise.all(getDataApi()).then((res) => {
     buttons.value = res[0].data
     data.value = res[1].data
     stockName.value = company
@@ -311,6 +321,14 @@ const getData = (stock = 'AAPL', company = 'Apple Inc.') => {
 onMounted(() => {
   getData()
 })
+
+const changeStock = async (stock, company) => {
+  designatedStock.value = stock
+  const [, getStockData] = getDataApi()
+  const res = await getStockData
+  data.value = res.data
+  stockName.value = company
+}
 
 // 將資料轉換成[時間,股價]
 const realTimeOffer = computed(() => {
@@ -476,16 +494,11 @@ const rankingJudge = (kind, type) => {
 
 // 選擇新聞類型
 
-const chooseNews = () => {
-  axios
-    .get(newsApi.value)
-    .then((res) => {
-      news.value = res.data.feed.length !== 0 ? res.data.feed : undefined
-      if (news.value !== undefined) news.value.length = 20
-    })
-    .catch((err) => {
-      console.log(err)
-    })
+const chooseNews = async () => {
+  const [, , , , , getNews] = getDataApi()
+  const res = await getNews
+  news.value = res.data.feed.length !== 0 ? res.data.feed : undefined
+  if (news.value !== undefined) news.value.length = 20
 }
 
 progressDone(realTimeOffer)

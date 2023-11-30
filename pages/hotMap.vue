@@ -77,14 +77,8 @@ const technologyStock = computed(() => {
 })
 
 const getData = async () => {
-  await axios
-    .get(softwareApi)
-    .then((res) => {
-      stockData.value = res.data
-    })
-    .catch((rej) => {
-      console.log(rej)
-    })
+  const res = await axios.get(softwareApi)
+  stockData.value = res.data
 }
 
 // 篩選後股票代號連接成字串
@@ -186,14 +180,8 @@ const chartData = computed(() => {
 
 watchEffect(async () => {
   if (stockName.value) {
-    await axios
-      .get(stockByVolumeApi.value)
-      .then((res) => {
-        stockByVolume.value = res.data
-      })
-      .catch((rej) => {
-        console.log(rej)
-      })
+    const res = await axios.get(stockByVolumeApi.value)
+    stockByVolume.value = res.data
   }
 })
 

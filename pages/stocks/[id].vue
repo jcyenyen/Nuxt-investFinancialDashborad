@@ -183,8 +183,11 @@ const fmp = import.meta.env.VITE_KEY_FMP
 const stockFundamentalApi = `https://financialmodelingprep.com/api/v3/profile/${id}?apikey=${fmp}`
 const stockChartApi = `https://financialmodelingprep.com/api/v3/historical-price-full/${id}?timeseries=365&apikey=${fmp}`
 
-const getStockFundamental = axios.get(stockFundamentalApi)
-const getFirstChart = axios.get(stockChartApi)
+const getDataApi = ()=>{
+  const getStockFundamental = axios.get(stockFundamentalApi)
+  const getFirstChart = axios.get(stockChartApi)
+ return [getFirstChart,getStockFundamental]
+}
 
 // 股票基本資料
 const stockData = ref()
@@ -216,8 +219,8 @@ const volume = computed(() => {
   return data
 })
 
-const getData = async () => {
-  await Promise.all([getFirstChart, getStockFundamental])
+const getData = () => {
+  Promise.all(getDataApi())
     .then((res) => {
       stockChart.value = res[0].data.historical
       stockData.value = res[1].data.map(
@@ -435,10 +438,9 @@ const selectAddtItem = (item) => {
 }
 
 // 輸入文字時提供預選框data
-const onInputEventHandler = () => {
-  axios.get(searchApi.value).then((res) => {
-    checkData.value = res.data.map((v) => v.symbol)
-  })
+const onInputEventHandler = async() => {
+  const res = await axios.get(searchApi.value)
+  checkData.value = res.data.map((v) => v.symbol)
 }
 
 //取消搜尋框enter預設
@@ -455,14 +457,8 @@ const cancelsel = async () =>{
 const changeChart = async (change, stock) => {
   if (change === 'add') {
     let newChart = []
-    await axios
-      .get(addChartApi.value)
-      .then((res) => {
-        newChart = res.data.historical
-      })
-      .catch((rej) => {
-        console.log(rej)
-      })
+    const res = await axios.get(addChartApi.value)
+    newChart = res.data.historical
     if(newChart !== undefined){
     newChart = newChart.reverse().map((v) => {
       const timeStamp = +dayjs(v.date) 
