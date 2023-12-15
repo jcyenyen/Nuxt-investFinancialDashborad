@@ -145,7 +145,7 @@
             class="news"
           >
             <img
-              :src="v.banner_image ? v.banner_image : '/FTNT.png'"
+              :src="v.banner_image ? v.banner_image : '~/assets/img/FTNT.png'"
               class="w-[30%] aspect-square object-contain me-3"
               alt=""
               @error="onError"
