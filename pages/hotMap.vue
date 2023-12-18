@@ -193,8 +193,8 @@ const chartOptions = computed(() => {
           enabled: false,
         },
         chart: {
-          height: '55%',
-          width: '1400',
+          height: '65%',
+          width:'1400'
         },
         colorAxis: {
           // minColor: '#F63538',
@@ -305,7 +305,9 @@ const chartOptions = computed(() => {
                       this.point.shapeArgs.width / this.point.shapeArgs.height >
                         20 ||
                       this.point.shapeArgs.height / this.point.shapeArgs.width >
-                        20
+                        20 ||
+                        this.point.shapeArgs.width < 40  ||
+                        this.point.shapeArgs.height < 35
                     ) {
                       return null
                     }
@@ -321,7 +323,7 @@ const chartOptions = computed(() => {
                       return this.point.name
                         .replace(
                           '<h3 style="font-size:48px;">',
-                          '<h3 style="font-size:36px;">'
+                          '<h3 style="font-size:36px;text-align:center;">'
                         )
                         .replace(
                           '<h4 style="font-size:24px;text-align:center;">',
@@ -334,7 +336,7 @@ const chartOptions = computed(() => {
                       return this.point.name
                         .replace(
                           '<h3 style="font-size:48px;">',
-                          '<h3 style="font-size:24px;">'
+                          '<h3 style="font-size:24px;text-align:center;">'
                         )
                         .replace(
                           '<h4 style="font-size:24px;text-align:center;">',
@@ -347,7 +349,7 @@ const chartOptions = computed(() => {
                       return this.point.name
                         .replace(
                           '<h3 style="font-size:48px;">',
-                          '<h3 style="font-size:16px;">'
+                          '<h3 style="font-size:16px;text-align:center;">'
                         )
                         .replace(
                           '<h4 style="font-size:24px;text-align:center;">',
@@ -360,7 +362,7 @@ const chartOptions = computed(() => {
                       return this.point.name
                         .replace(
                           '<h3 style="font-size:48px;">',
-                          '<h3 style="font-size:12px;">'
+                          '<h3 style="font-size:12px;text-align:center;">'
                         )
                         .replace(
                           '<h4 style="font-size:24px;text-align:center;">',
