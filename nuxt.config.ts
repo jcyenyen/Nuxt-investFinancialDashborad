@@ -19,5 +19,8 @@ export default defineNuxtConfig({
   app: {
     baseURL: process.env.NODE_ENV === 'production' ? '/Nuxt-investFinancialDashborad/' : '/',
     buildAssetsDir: '/static/'
+  },
+  experimental: {
+    payloadExtraction: false
   }
 })
