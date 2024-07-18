@@ -241,7 +241,7 @@ const volumeLower = computed(() => {
 })
 
 const sector = ref('Technology')
-const industry = ref('Software—Infrastructure')
+const industry = ref('Software - Infrastructure')
 
 const dividend = ref('')
 const dividendMore = computed(() => {
