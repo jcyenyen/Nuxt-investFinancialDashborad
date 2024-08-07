@@ -1,29 +1,26 @@
 <template>
   <NuxtLayout name="header">
     <template v-if="ohlc" #main>
-      <div
+      <article
         v-if="ohlc.length !== 0"
         class="w-[95%] mt-3 mx-auto flex justify-between"
       >
-        <div class="w-[65%] h-[50%] rounded">
+        <section class="w-[65%] h-[50%] rounded">
           <div class="flex justify-between w-[95%] mx-auto mt-4">
             <div class="my-1 w-[47%]">
               <label for="overlays" class="font-bold">覆蓋指標</label>
               <select
                 class="border border-solid border-[#bebebe] rounded ms-2 w-[84%]"
                 id="overlays"
-                @change="overlaysChoose"
+                @change="chooseOverlays"
               >
-                <option value="ema">EMA (Exponential Moving Average)</option>
-                <option value="linearRegression">Linear Regression</option>
-                <option value="pivotpoints">Pivot Points</option>
-                <option value="pc" selected="selected">Price Channel</option>
-                <option value="priceenvelopes">Price Envelopes</option>
-                <option value="sma">SMA (Simple Moving Average)</option>
-                <option value="vbp">VbP (Volume by Price)</option>
-                <option value="wma">WMA (Weighted Moving Average)</option>
-                <option value="vwap">
-                  VWAP (Volume Weighted Average Price)
+                <option
+                  v-for="(option, index) in overlaysOptions"
+                  :key="index"
+                  :value="option.value"
+                  :selected="option.selected"
+                >
+                  {{ option.text }}
                 </option>
               </select>
             </div>
@@ -32,18 +29,16 @@
               <select
                 class="border border-solid border-[#bebebe] rounded ms-2 w-[84%]"
                 id="oscillators"
-                @change="OscillatorChoose"
+                @change="chooseOscillator"
               >
-                <option value="atr">ATR (Average True Range)</option>
-                <option value="ao">Awesome oscillator</option>
-                <option value="cci">CCI (Commodity Channel Index)</option>
-                <option value="disparityindex">Disparity Index</option>
-                <option value="dmi">DMI (Directional Movement Index)</option>
-                <option value="macd" selected="selected">
-                  MACD (Moving Average Convergence Divergence)
+                <option
+                  v-for="(option, index) in oscillatorOptions"
+                  :key="index"
+                  :value="option.value"
+                  :selected="option.selected"
+                >
+                  {{ option.text }}
                 </option>
-                <option value="mfi">MFI (Money Flow Index)</option>
-                <option value="rsi">RSI (Relative Strength Index)</option>
               </select>
             </div>
           </div>
@@ -55,65 +50,67 @@
               :callback="afterChartInit"
             />
           </ClientOnly>
-        </div>
-        <div class="w-[33%] flex flex-wrap">
-          <div
-            v-for="(value, key) in stockData"
+        </section>
+        <section class="w-[33%] flex flex-wrap">
+          <ul
+            v-for="(value, key) in filtedStockDetail"
             :key="key"
             class="w-[25%] mt-5"
           >
-            <div
+            <li
               class="flex items-center font-bold text-base italic min-h-[30px] stockborder"
             >
-              {{ translateKey(key) }}
-            </div>
-            <div class="flex items-start font-normal text-xs min-h-[60px] max-w-[90px] break-all ">
+              {{ translateDetail(key) }}
+            </li>
+            <li
+              class="flex items-start font-normal text-xs min-h-[60px] max-w-[90px] break-all"
+            >
               {{ value }}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        v-if="stockChartFix.length !== 0"
+            </li>
+          </ul>
+        </section>
+      </article>
+      <article
+        v-if="comparedStockChart.length !== 0"
         class="w-[95%] mx-auto mt-3 flex items-start justify-between"
       >
         <ClientOnly>
-          <div
-            class="w-[27%] border-0 border-y border-solid py-3 "
-          >
+          <section class="w-[27%] border-0 border-y border-solid py-3">
             <div class="flex items-center">
-              <div class="p-1 flex items-center h-[70px] w-[43%] cursor-pointer">
+              <figure
+                class="p-1 flex items-center h-[70px] w-[43%] cursor-pointer"
+              >
                 <font-awesome-icon
                   :icon="['far', 'square-plus']"
                   size="2xl"
                   fade
                   style="color: black"
                   class="mx-2"
-                  @click="cancelsel"
+                  @click="toggleSearch"
                 />
                 <label
-                  for="typeahead_add"
-                  @click="searchAdd = !searchAdd"
+                  for="typeahead_chart"
+                  @click="toggleSearch"
                   class="ms-1 text-[18px] w-[80%] font-bold cursor-pointer"
                   >股票績效比較</label
                 >
-              </div>
+              </figure>
               <vue3-simple-typeahead
                 ref="inputRef"
-                id="typeahead_add"
+                id="typeahead_chart"
                 placeholder="搜尋股票..."
-                v-if="searchAdd"
+                v-if="isSearch"
                 class="w-[98%] p-1 bg-white rounded shadow :active:border-white"
                 :items="checkData"
                 :minInputLength="1"
                 v-model="searchAddStock"
-                @onInput="onInputEventHandler"
-                @keydown.native.enter="changeChart('add')"
-                @selectItem="selectAddtItem"
+                @onInput="updateCheckData"
+                @keydown.native.enter="addChart"
+                @selectItem="selectToAddChart"
               >
                 <template #list-item-text="slot">
-                  <div  class="">
-                    <span 
+                  <div class="">
+                    <span
                       v-html="
                         slot.boldMatchText(slot.itemProjection(slot.item))
                       "
@@ -124,37 +121,38 @@
             </div>
             <div>
               <ul>
-                <li v-for="v in MultiChart" class="w-[75%] ms-[30px] flex items-center my-1 cursor-pointer">
+                <li
+                  v-for="stock in multiComparedStockChart"
+                  class="w-[75%] ms-[30px] flex items-center my-1 cursor-pointer"
+                >
                   <div class="p-1">
                     <font-awesome-icon
                       :icon="['far', 'square-minus']"
                       style="color: black"
                       class="inline-block"
-                      @click="changeChart('remove',v.name)"
+                      @click="removeChart(stock.name)"
                     />
                   </div>
-                  <img
-                    :src="`https://financialmodelingprep.com/image-stock/${v.name}.png`"
-                    class="inline-block w-[20px] h-[20px] aspect-square mx-2"
-                    :class="
-                      v.name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''
-                    "
-                    @error="onError"
-                  />
-                  <p>{{ v.name }}</p>
+                  <figure class="flex">
+                    <img
+                      :src="`https://financialmodelingprep.com/image-stock/${stock.name}.png`"
+                      class="inline-block w-[20px] h-[20px] aspect-square mx-2"
+                      :class="isAppleIcon(stock.name)"
+                      @error="onError"
+                    />
+                    <figcaption>{{ stock.name }}</figcaption>
+                  </figure>
                 </li>
               </ul>
             </div>
-          </div>
-        </ClientOnly>
-        <ClientOnly>
+          </section>
           <highcharts
             class="mb-10 w-[70%]"
             :constructor-type="'stockChart'"
-            :options="chartOptionsMulti"
+            :options="multiChartOptions"
           />
         </ClientOnly>
-      </div>
+      </article>
     </template>
   </NuxtLayout>
 </template>
@@ -168,13 +166,10 @@ const dayjs = useDayjs()
 // 所在頁面 header按鈕顯示顏色
 const pathStore = usePathStore()
 const { path } = storeToRefs(pathStore)
-
 const route = useRoute()
 path.value = route.name
 
 const id = route.params.id
-
-
 
 // key
 const fmp = import.meta.env.VITE_KEY_FMP
@@ -183,37 +178,56 @@ const fmp = import.meta.env.VITE_KEY_FMP
 const stockFundamentalApi = `https://financialmodelingprep.com/api/v3/profile/${id}?apikey=${fmp}`
 const stockChartApi = `https://financialmodelingprep.com/api/v3/historical-price-full/${id}?timeseries=365&apikey=${fmp}`
 
-const getDataApi = ()=>{
+const getDataApi = () => {
   const getStockFundamental = axios.get(stockFundamentalApi)
   const getFirstChart = axios.get(stockChartApi)
- return [getFirstChart,getStockFundamental]
+  return [getFirstChart, getStockFundamental]
 }
 
-// 股票基本資料
-const stockData = ref()
-
-// 股票技術線圖
+const stockDetail = ref()
 const stockChart = ref()
 
-const stockChartRev = computed(() =>
+const filtedStockDetail = computed(() => {
+  stockDetail.value = stockDetail.value.map(
+    ({
+      exchange,
+      description,
+      zip,
+      dcfDiff,
+      dcf,
+      image,
+      defaultImage,
+      isEtf,
+      isActivelyTrading,
+      isAdr,
+      isFund,
+      ipoDate,
+      ...rest
+    }) => rest
+  )
+  return stockDetail.value ? stockDetail.value[0] : []
+})
+
+const sortedStockChart = computed(() =>
   stockChart.value ? stockChart.value.reverse() : []
 )
 
 const ohlc = computed(() => {
-  const data = stockChartRev.value
-    ? stockChartRev.value.map((v) => {
-        const timeStamp = +dayjs(v.date) 
-        return [timeStamp, v.open, v.high, v.low, v.close]
+  const data = sortedStockChart.value
+    ? sortedStockChart.value.map((stock) => {
+        const timeStamp = +dayjs(stock.date)
+        const { open, high, low, close } = stock
+        return [timeStamp, open, high, low, close]
       })
     : undefined
   return data
 })
 
 const volume = computed(() => {
-  const data = stockChartRev.value
-    ? stockChartRev.value.map((v) => {
-        const timeStamp = +dayjs(v.date) 
-        return [timeStamp, v.volume]
+  const data = sortedStockChart.value
+    ? sortedStockChart.value.map((stock) => {
+        const timeStamp = +dayjs(stock.date)
+        return [timeStamp, stock.volume]
       })
     : []
   return data
@@ -223,24 +237,7 @@ const getData = () => {
   Promise.all(getDataApi())
     .then((res) => {
       stockChart.value = res[0].data.historical
-      stockData.value = res[1].data.map(
-        ({
-          exchange,
-          description,
-          zip,
-          dcfDiff,
-          dcf,
-          image,
-          defaultImage,
-          isEtf,
-          isActivelyTrading,
-          isAdr,
-          isFund,
-          ipoDate,
-          ...rest
-        }) => rest
-      )
-      stockData.value = stockData.value[0]
+      stockDetail.value = res[1].data
     })
     .catch((rej) => {
       console.log(rej)
@@ -271,7 +268,6 @@ const chartOptions = computed(() => {
     legend: {
       enabled: true,
     },
-    // 範圍選擇器
     rangeSelector: {
       // 預設第幾個:索引
       selected: 2,
@@ -281,9 +277,7 @@ const chartOptions = computed(() => {
         height: '60%',
       },
       {
-        // 離頂部距離
         top: '60%',
-        // 圖高度
         height: '20%',
       },
       {
@@ -315,7 +309,7 @@ const chartOptions = computed(() => {
           'typeChange',
           'separator',
           'currentPriceIndicator',
-        ], 
+        ],
       },
     },
     series: [
@@ -348,15 +342,39 @@ const chartOptions = computed(() => {
   }
 })
 
-// 技術指標方法
-const overlaysChoose = ref()
-const OscillatorChoose = ref()
+const chooseOverlays = ref()
+const overlaysOptions = ref([
+  { value: 'ema', text: 'EMA (Exponential Moving Average)' },
+  { value: 'linearRegression', text: 'Linear Regression' },
+  { value: 'pivotpoints', text: 'Pivot Points' },
+  { value: 'pc', text: 'Price Channel', selected: true },
+  { value: 'priceenvelopes', text: 'Price Envelopes' },
+  { value: 'sma', text: 'SMA (Simple Moving Average)' },
+  { value: 'vbp', text: 'VbP (Volume by Price)' },
+  { value: 'wma', text: 'WMA (Weighted Moving Average)' },
+  { value: 'vwap', text: 'VWAP (Volume Weighted Average Price)' },
+])
+const chooseOscillator = ref()
+const oscillatorOptions = ref([
+  { value: 'atr', text: 'ATR (Average True Range)' },
+  { value: 'ao', text: 'Awesome oscillator' },
+  { value: 'cci', text: 'CCI (Commodity Channel Index)' },
+  { value: 'disparityindex', text: 'Disparity Index' },
+  { value: 'dmi', text: 'DMI (Directional Movement Index)' },
+  {
+    value: 'macd',
+    text: 'MACD (Moving Average Convergence Divergence)',
+    selected: true,
+  },
+  { value: 'mfi', text: 'MFI (Money Flow Index)' },
+  { value: 'rsi', text: 'RSI (Relative Strength Index)' },
+])
 
 // 取出highChartStock元件方法
 const afterChartInit = (chart) => {
   // 更換覆蓋指標
   const overlays = (e) => {
-    var series = chart.get('overlay')
+    let series = chart.get('overlay')
     if (series) {
       series.remove(false)
       chart.addSeries({
@@ -369,7 +387,7 @@ const afterChartInit = (chart) => {
 
   // 更換技術指標
   const oscillator = (e) => {
-    var series = chart.get('oscillator')
+    let series = chart.get('oscillator')
     if (series) {
       series.remove(false)
       chart.addSeries({
@@ -380,48 +398,41 @@ const afterChartInit = (chart) => {
       })
     }
   }
-  overlaysChoose.value = overlays
-  OscillatorChoose.value = oscillator
+  chooseOverlays.value = overlays
+  chooseOscillator.value = oscillator
 }
 
 // 股票績效比較
 
-const fix = (stock) => {
-  const data = stock
-    ? stock.map((v) => {
-        const timeStamp = +dayjs(v.date) 
-        return [timeStamp, v.close]
+const comparedStockChart = computed(() => {
+  const data = sortedStockChart.value
+    ? sortedStockChart.value.map((stock) => {
+        const timeStamp = +dayjs(stock.date)
+        return [timeStamp, stock.close]
       })
     : []
   return data
-}
-
-const stockChartFix = computed(() => {
-  return fix(stockChartRev.value)
 })
 
-// 股票績效相關
-
-const searchAdd = ref(false)
+const isSearch = ref(false)
 const checkData = ref([])
 const searchAddStock = ref('')
 const searchRemoveStock = ref('')
 
-const MultiChart = ref([])
+const multiComparedStockChart = ref([])
 
 watchEffect(() => {
-  MultiChart.value = stockChartFix
+  multiComparedStockChart.value = comparedStockChart
     ? [
         {
           name: `${id.toUpperCase()}`,
-          data: stockChartFix.value,
+          data: comparedStockChart.value,
         },
       ]
     : []
 })
 
 // 預先輸入框資料10筆
-
 const searchApi = computed(() => {
   return `https://financialmodelingprep.com/api/v3/search?query=${searchAddStock.value}&limit=10&exchange=NASDAQ&apikey=${fmp}`
 })
@@ -431,68 +442,66 @@ const addChartApi = computed(() => {
   return `https://financialmodelingprep.com/api/v3/historical-price-full/${searchAddStock.value}?timeseries=365&apikey=${fmp}`
 })
 
-// 點選預選框新增股票
-const selectAddtItem = (item) => {
+const inputRef = ref(null)
+const selectToAddChart = (item) => {
   searchAddStock.value = item
-  changeChart('add')
+  addChart()
+  inputRef.value.clearInput()
 }
 
-// 輸入文字時提供預選框data
-const onInputEventHandler = async() => {
+const updateCheckData = async () => {
   const res = await axios.get(searchApi.value)
-  checkData.value = res.data.map((v) => v.symbol)
+  checkData.value = res.data.map((stock) => stock.symbol)
 }
 
-//取消搜尋框enter預設
-
-const inputRef = ref()
-const cancelsel = async () =>{
-  searchAdd.value = !searchAdd.value
+const toggleSearch = async () => {
+  isSearch.value = !isSearch.value
+  //取消搜尋框enter預設
   await nextTick()
-  inputRef.value.selectCurrentSelection =()=>{}
+  inputRef.value.selectCurrentSelection = () => {}
 }
 
-//增加&刪減股票
-
-const changeChart = async (change, stock) => {
-  if (change === 'add') {
-    let newChart = []
-    const res = await axios.get(addChartApi.value)
-    newChart = res.data.historical
-    if(newChart !== undefined){
+const addChart = async () => {
+  let newChart = []
+  const res = await axios.get(addChartApi.value)
+  newChart = res.data.historical
+  if (newChart !== undefined) {
     newChart = newChart.reverse().map((v) => {
-      const timeStamp = +dayjs(v.date) 
+      const timeStamp = +dayjs(v.date)
       return [timeStamp, v.close]
     })
-    MultiChart.value.push({
+    multiComparedStockChart.value.push({
       name: searchAddStock.value.toUpperCase(),
       data: newChart,
-    })}else{
-      ElMessageBox.confirm('無此檔股票,請重新搜尋', '提示', {
+    })
+  } else {
+    ElMessageBox.confirm('無此檔股票,請重新搜尋', '提示', {
       showCancelButton: false,
       confirmButtonText: '確定',
       type: 'success',
     })
-    }
-  } else if (change === 'remove') {
-    searchRemoveStock.value = stock
-    MultiChart.value = MultiChart.value.filter(
-      (item) => item.name !== searchRemoveStock.value
-    )
   }
+  inputRef.value.clearInput()
+}
+
+const removeChart = (stock) => {
+  searchRemoveStock.value = stock
+  multiComparedStockChart.value = multiComparedStockChart.value.filter(
+    (item) => item.name !== searchRemoveStock.value
+  )
 }
 
 // 績效圖表
-const chartOptionsMulti = computed(() => {
+const multiChartOptions = computed(() => {
   return {
-    accessibility:{
-          enabled:false
-        },
+    accessibility: {
+      enabled: false,
+    },
     chart: {
       height: 500,
     },
     // 預設選第五個選擇器(1y)
-    rangeSelector: {            
+    rangeSelector: {
       selected: 4,
     },
     yAxis: {
@@ -557,15 +566,14 @@ const chartOptionsMulti = computed(() => {
           'separator',
           'currentPriceIndicator',
           'saveChart',
-        ], 
+        ],
       },
     },
-    series: MultiChart.value,
+    series: multiComparedStockChart.value,
   }
 })
 
-// 翻譯
-const translateKey = (key) => {
+const translateDetail = (key) => {
   const translations = {
     symbol: '代號',
     price: '價格',
@@ -607,8 +615,10 @@ const translateKey = (key) => {
   return translations[key] || key
 }
 
-progressDone(ohlc)
+const isAppleIcon = (name) =>
+  name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''
 
+progressDone(ohlc)
 </script>
 <style lang="scss" scoped>
 .stockborder {
@@ -622,7 +632,7 @@ progressDone(ohlc)
   background-color: #d5d8d4;
 }
 
-:deep(.simple-typeahead){
+:deep(.simple-typeahead) {
   width: 60%;
 }
 
@@ -636,7 +646,7 @@ progressDone(ohlc)
 //     font-size: 30px !important;
 // }
 
-:deep(.simple-typeahead-list-item) {    
-    background-color: white !important;
+:deep(.simple-typeahead-list-item) {
+  background-color: white !important;
 }
 </style>

@@ -10,9 +10,9 @@
         :items="checkData"
         :minInputLength="1"
         v-model="searchStock"
-        @onInput="onInputEventHandler"
-        @keydown.native.prevent.enter="searchToStock"
-        @selectItem="selectAddtItem"
+        @onInput="updateCheckData"
+        @keydown.native.prevent.enter="goToSearchStockPage"
+        @selectItem="selectToSearchStockPage"
       >
         <template #list-item-text="slot">
           <div class="">
@@ -25,23 +25,14 @@
     </ClientOnly>
     <div>
       <nuxt-link
-        to="/"
+        v-for="(link, index) in navLinks"
+        :key="index"
+        :to="link.to"
         class="nav-a shadow"
-        :class="path === 'index' ? 'bg-[#063a34] text-white' : ''"
-        >首頁</nuxt-link
+        :class="showPageNow(link.page)"
       >
-      <nuxt-link
-        to="/stockFilter"
-        class="nav-a shadow"
-        :class="path === 'stockFilter' ? 'bg-[#063a34] text-white' : ''"
-        >股票篩選</nuxt-link
-      >
-      <nuxt-link
-        to="/hotMap"
-        class="nav-a shadow"
-        :class="path === 'hotMap' ? 'bg-[#063a34] text-white' : ''"
-        >股票熱區地圖</nuxt-link
-      >
+        {{ link.text }}
+      </nuxt-link>
     </div>
   </nav>
   <slot name="main" />
@@ -54,7 +45,6 @@ import { storeToRefs } from 'pinia'
 // nav目前頁面顏色
 const pathStore = usePathStore()
 const { path } = storeToRefs(pathStore)
-
 const router = useRouter()
 
 // key
@@ -65,36 +55,39 @@ const searchApi = computed(() => {
   return `https://financialmodelingprep.com/api/v3/search?query=${searchStock.value}&limit=10&exchange=NASDAQ&apikey=${fmp}`
 })
 
-// 股票搜尋
+const navLinks = ref([
+  { to: '/', text: '首頁', page: 'index' },
+  { to: '/stockFilter', text: '股票篩選', page: 'stockFilter' },
+  { to: '/hotMap', text: '股票熱區地圖', page: 'hotMap' },
+])
 
 const checkData = ref([])
 const searchStock = ref('')
-const inputRef = ref()
-
-//取消搜尋框enter預設
+const inputRef = ref(null)
 
 onMounted(async () => {
+  //取消搜尋框enter預設功能
   await nextTick()
   inputRef.value.selectCurrentSelection = () => {}
 })
 
-// 點選預選框跳轉股票單頁
-const selectAddtItem = (item) => {
+const selectToSearchStockPage = (item) => {
   searchStock.value = item
-  searchToStock()
+  goToSearchStockPage()
 }
 
-// 輸入文字時提供預選框data
-const onInputEventHandler = () => {
+const updateCheckData = () => {
   axios.get(searchApi.value).then((res) => {
-    checkData.value = res.data.map((v) => v.symbol)
+    checkData.value = res.data.map((stock) => stock.symbol)
   })
 }
 
-// 跳轉股票單頁
-const searchToStock = () => {
+const goToSearchStockPage = () => {
   router.push(`/stocks/${searchStock.value.toUpperCase()}`)
 }
+
+const showPageNow = (route) =>
+  path.value === route ? 'bg-[#063a34] text-white' : ''
 </script>
 <style lang="scss" scoped>
 nav {
@@ -105,8 +98,8 @@ nav {
   color: #063a34;
   font-weight: 900;
   text-shadow: 2px 2px 0px #a2c8c4;
-  // text-shadow: 1px 1px 0px #063a34;
 }
+
 :deep(.simple-typeahead) {
   width: 30%;
 }
@@ -121,4 +114,3 @@ nav {
   background-color: white !important;
 }
 </style>
-
