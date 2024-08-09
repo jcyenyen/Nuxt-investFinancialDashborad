@@ -16,7 +16,7 @@
 </template>
 <script setup>
 import axios from 'axios'
-import { usePathStore } from '../stores/stock.js'
+import { usePathStore } from '../stores/navBar.js'
 import { storeToRefs } from 'pinia'
 
 definePageMeta({
@@ -194,7 +194,7 @@ const chartOptions = computed(() => {
         },
         chart: {
           height: '65%',
-          width:'1400'
+          width: '1400',
         },
         colorAxis: {
           // minColor: '#F63538',
@@ -306,8 +306,8 @@ const chartOptions = computed(() => {
                         20 ||
                       this.point.shapeArgs.height / this.point.shapeArgs.width >
                         20 ||
-                        this.point.shapeArgs.width < 40  ||
-                        this.point.shapeArgs.height < 35
+                      this.point.shapeArgs.width < 40 ||
+                      this.point.shapeArgs.height < 35
                     ) {
                       return null
                     }
@@ -418,4 +418,3 @@ progressDone(chartOptions)
   background-color: #000000;
 }
 </style>
-

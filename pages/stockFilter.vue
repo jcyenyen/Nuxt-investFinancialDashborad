@@ -199,7 +199,7 @@
 </template>
 <script setup>
 import axios from 'axios'
-import { usePathStore } from '../stores/stock.js'
+import { usePathStore } from '../stores/navBar.js'
 import { storeToRefs } from 'pinia'
 
 definePageMeta({

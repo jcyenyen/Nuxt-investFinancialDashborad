@@ -39,7 +39,7 @@
 </template>
 <script setup>
 import axios from 'axios'
-import { usePathStore } from '../stores/stock.js'
+import { usePathStore } from '../stores/navBar.js'
 import { storeToRefs } from 'pinia'
 
 // nav目前頁面顏色

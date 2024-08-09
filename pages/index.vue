@@ -171,7 +171,7 @@
 import axios from 'axios'
 import charts from 'highcharts'
 import { useRouter } from 'vue-router'
-import { usePathStore } from '../stores/stock.js'
+import { usePathStore } from '../stores/navBar.js'
 import { storeToRefs } from 'pinia'
 
 definePageMeta({

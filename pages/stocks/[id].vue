@@ -158,8 +158,13 @@
 </template>
 <script setup>
 import axios from 'axios'
-import { usePathStore } from '../stores/stock.js'
+import { usePathStore } from '../stores/navBar.js'
 import { storeToRefs } from 'pinia'
+import {
+  getStockFundamental,
+  getStockTrend,
+  searchStock,
+} from '~/utils/apis/modules/stocks.js'
 
 const dayjs = useDayjs()
 
@@ -173,16 +178,6 @@ const id = route.params.id
 
 // key
 const fmp = import.meta.env.VITE_KEY_FMP
-
-// API
-const stockFundamentalApi = `https://financialmodelingprep.com/api/v3/profile/${id}?apikey=${fmp}`
-const stockChartApi = `https://financialmodelingprep.com/api/v3/historical-price-full/${id}?timeseries=365&apikey=${fmp}`
-
-const getDataApi = () => {
-  const getStockFundamental = axios.get(stockFundamentalApi)
-  const getFirstChart = axios.get(stockChartApi)
-  return [getFirstChart, getStockFundamental]
-}
 
 const stockDetail = ref()
 const stockChart = ref()
@@ -233,15 +228,11 @@ const volume = computed(() => {
   return data
 })
 
-const getData = () => {
-  Promise.all(getDataApi())
-    .then((res) => {
-      stockChart.value = res[0].data.historical
-      stockDetail.value = res[1].data
-    })
-    .catch((rej) => {
-      console.log(rej)
-    })
+const getData = async () => {
+  const stockFundamental = await getStockFundamental(id)
+  const stockTrend = await getStockTrend(id)
+  stockDetail.value = stockFundamental
+  stockChart.value = stockTrend.historical
 }
 
 onMounted(() => {
@@ -432,16 +423,6 @@ watchEffect(() => {
     : []
 })
 
-// 預先輸入框資料10筆
-const searchApi = computed(() => {
-  return `https://financialmodelingprep.com/api/v3/search?query=${searchAddStock.value}&limit=10&exchange=NASDAQ&apikey=${fmp}`
-})
-
-// 新增績效股票api
-const addChartApi = computed(() => {
-  return `https://financialmodelingprep.com/api/v3/historical-price-full/${searchAddStock.value}?timeseries=365&apikey=${fmp}`
-})
-
 const inputRef = ref(null)
 const selectToAddChart = (item) => {
   searchAddStock.value = item
@@ -450,8 +431,8 @@ const selectToAddChart = (item) => {
 }
 
 const updateCheckData = async () => {
-  const res = await axios.get(searchApi.value)
-  checkData.value = res.data.map((stock) => stock.symbol)
+  const res = await searchStock(searchAddStock.value)
+  checkData.value = res.map((stock) => stock.symbol)
 }
 
 const toggleSearch = async () => {
@@ -463,8 +444,8 @@ const toggleSearch = async () => {
 
 const addChart = async () => {
   let newChart = []
-  const res = await axios.get(addChartApi.value)
-  newChart = res.data.historical
+  const res = await getStockTrend(searchAddStock.value)
+  newChart = res.historical
   if (newChart !== undefined) {
     newChart = newChart.reverse().map((v) => {
       const timeStamp = +dayjs(v.date)
