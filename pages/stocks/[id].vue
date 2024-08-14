@@ -157,7 +157,6 @@
   </NuxtLayout>
 </template>
 <script setup>
-import axios from 'axios'
 import { usePathStore } from '../stores/navBar.js'
 import { storeToRefs } from 'pinia'
 import {
@@ -175,9 +174,6 @@ const route = useRoute()
 path.value = route.name
 
 const id = route.params.id
-
-// key
-const fmp = import.meta.env.VITE_KEY_FMP
 
 const stockDetail = ref()
 const stockChart = ref()
@@ -394,7 +390,6 @@ const afterChartInit = (chart) => {
 }
 
 // 股票績效比較
-
 const comparedStockChart = computed(() => {
   const data = sortedStockChart.value
     ? sortedStockChart.value.map((stock) => {
@@ -598,6 +593,8 @@ const translateDetail = (key) => {
 
 const isAppleIcon = (name) =>
   name == 'AAPL' ? 'bg-black p-1 rounded-[50%]' : ''
+
+
 
 progressDone(ohlc)
 </script>
