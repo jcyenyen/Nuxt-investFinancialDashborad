@@ -1,95 +1,29 @@
 <template>
   <NuxtLayout name="header">
-    <template v-if="stockResult" #main>
-      <div class="w-[100%] mx-auto mt-5 mb-10 py-10 flex flex-wrap">
-        <div class="my-1 w-[24%] flex justify-end items-center">
-          <label for="marketCap" class="font-bold text-[16px]">市值</label>
-          <select id="marketCap" v-model="marketCap" @change="getData">
+    <template v-if="sortedStockData" #main>
+      <section class="w-[100%] mx-auto mt-5 mb-10 py-10 flex flex-wrap">
+        <div
+          v-for="(kind, index) in stockOptions"
+          :key="index"
+          class="my-1 w-[24%] flex justify-end items-center"
+        >
+          <label :for="kind.id" class="font-bold text-[16px]">{{
+            kind.label
+          }}</label>
+          <select :id="kind.id" v-model="kind.model" @change="handleSelect">
             <option value="" key="none" label="請選擇" />
             <option
-              v-for="(v, i) in marketCapOption"
-              :value="v.value"
-              :key="i"
-              :label="v.label"
+              v-for="(option, index) in kind.options"
+              :value="option.value || option.sector || option.industry"
+              :key="option.ID || index"
+              :label="option.label || option.sector || option.industry"
             />
           </select>
         </div>
-        <div class="my-1 w-[24%] flex justify-end items-center">
-          <label for="volume" class="font-bold text-[16px]">目前成交量</label>
-          <select id="volume" v-model="volume" @change="getData">
-            <option value="" key="none" label="請選擇" />
-            <option
-              v-for="(v, i) in volumeOption"
-              :value="v.value"
-              :key="i"
-              :label="v.label"
-            />
-          </select>
-        </div>
-        <div class="my-1 w-[24%] flex justify-end items-center">
-          <label for="sector" class="font-bold text-[16px]">產業</label>
-          <select id="sector" v-model="sector" @change="getData">
-            <option value="" key="none" label="請選擇" />
-            <option
-              v-for="v in sectorOption"
-              :value="v.sector"
-              :key="v.ID"
-              :label="v.sector"
-            />
-          </select>
-        </div>
-        <div class="my-1 w-[24%] flex justify-end items-center">
-          <label for="industry" class="font-bold text-[16px]">行業</label>
-          <select id="industry" v-model="industry" @change="getData">
-            <option value="" key="none" label="請選擇" />
-            <option
-              v-for="(v, i) in industryOption"
-              :value="v.industry"
-              :key="i"
-              :label="v.industry"
-            />
-          </select>
-        </div>
-        <div class="my-1 w-[24%] flex justify-end items-center">
-          <label for="beta" class="font-bold text-[16px]">Beta值</label>
-          <select id="beta" v-model="beta" @change="getData">
-            <option value="" key="none" label="請選擇" />
-            <option
-              v-for="(v, i) in betaOption"
-              :value="v.value"
-              :key="i"
-              :label="v.label"
-            />
-          </select>
-        </div>
-        <div class="my-1 w-[24%] flex justify-end items-center">
-          <label for="dividend" class="font-bold text-[16px]">股息</label>
-          <select id="dividend" v-model="dividend" @change="getData">
-            <option value="" key="none" label="請選擇" />
-            <option
-              v-for="(v, i) in dividendOption"
-              :value="v.value"
-              :key="i"
-              :label="v.label"
-            />
-          </select>
-        </div>
-        <div class="my-1 w-[24%] flex justify-end items-center">
-          <label for="dividend" class="font-bold text-[16px]">股價</label>
-          <select id="price" v-model="price" @change="getData">
-            <option value="" key="none" label="請選擇" />
-            <option
-              v-for="(v, i) in priceOption"
-              :value="v.value"
-              :key="i"
-              :label="v.label"
-            />
-          </select>
-        </div>
-      </div>
-      <div class="w-[93%] mx-auto">
+      </section>
+      <section class="w-[93%] mx-auto">
         <el-table
-          :data="stockResult"
+          :data="sortedStockData"
           style="width: 100%"
           :default-sort="{ prop: 'marketCap', order: 'descending' }"
         >
@@ -185,15 +119,15 @@
           <el-pagination
             layout="total, sizes, prev, pager, next, jumper"
             :current-page="page"
-            :page-count="total"
+            :page-count="pageTotal"
             :page-size="pageSize"
             :page-sizes="[10, 30, 50, 100]"
-            :total="total"
-            @current-change="handleCurrentChange"
+            :total="pageTotal"
+            @current-change="handleCurrentPageChange"
             @size-change="handleSizeChange"
           />
         </div>
-      </div>
+      </section>
     </template>
   </NuxtLayout>
 </template>
@@ -217,8 +151,8 @@ path.value = route.name
 const fmp = import.meta.env.VITE_KEY_FMP
 
 // 找相對的上限或下限
-const matchOption = (option, limit, choose) => {
-  const match = option.find((v) => v.value === choose)
+const matchOption = (stockOptions, limit, choose) => {
+  const match = stockOptions.find((option) => option.value === choose)
   return match ? match[limit] : ''
 }
 
@@ -372,50 +306,80 @@ const priceOption = ref([
   { label: '50~100美元', value: '18', more: '50', lower: '100' },
 ])
 
-// api
+const stockOptions = ref([
+  {
+    id: 'marketCap',
+    label: '市值',
+    model: marketCap,
+    options: marketCapOption,
+  },
+  {
+    id: 'volume',
+    label: '目前成交量',
+    model: volume,
+    options: volumeOption,
+  },
+  {
+    id: 'sector',
+    label: '產業',
+    model: sector,
+    options: sectorOption,
+  },
+  {
+    id: 'industry',
+    label: '行業',
+    model: industry,
+    options: industryOption,
+  },
+  { id: 'beta', label: 'Beta值', model: beta, options: betaOption },
+  {
+    id: 'dividend',
+    label: '股息',
+    model: dividend,
+    options: dividendOption,
+  },
+  {
+    id: 'price',
+    label: '股價',
+    model: price,
+    options: priceOption,
+  },
+])
 
+// api
 const stockApi = computed(
   () =>
     `https://financialmodelingprep.com/api/v3/stock-screener?marketCapMoreThan=${marketCapMore.value}&marketCapLowerThan=${marketCapLower.value}&volumeMoreThan=${volumeMore.value}&volumeLowerThan=${volumeLower.value}&sector=${sector.value}&industry=${industry.value}&dividendMoreThan=${dividendMore.value}&dividendLowerThan=${dividendLower.value}&betaMoreThan=${betaMore.value}&betaLowerThan=${betaLower.value}&priceMoreThan=${priceMore.value}&priceLowerThan=${priceLower.value}&limit=&apikey=${fmp}`
 )
 
-// 產業的option
-const sectorApi = `https://financialmodelingprep.com/api/v3/sector-performance?apikey=${fmp}`
+const sectorOptionApi = `https://financialmodelingprep.com/api/v3/sector-performance?apikey=${fmp}`
 
-// 行業的option
-const industryApi = `https://financialmodelingprep.com/api/v4/industry_price_earning_ratio?date=2023-10-10&exchange=NASDAQ&apikey=${fmp}`
+const industryOptionApi = `https://financialmodelingprep.com/api/v4/industry_price_earning_ratio?date=2023-10-10&exchange=NASDAQ&apikey=${fmp}`
 
 const getDataApi = () => {
   const getStockApi = axios.get(stockApi.value)
-  const getSectorApi = axios.get(sectorApi)
-  const getIndustryApi = axios.get(industryApi)
+  const getSectorApi = axios.get(sectorOptionApi)
+  const getIndustryApi = axios.get(industryOptionApi)
 
   return [getStockApi, getSectorApi, getIndustryApi]
 }
 
-// 篩選後的股票(不含漲跌幅)
-
 const stockData = ref([])
 
-// 頁籤
-
 const page = ref(1)
-const total = ref()
+const pageTotal = ref()
 const pageSize = ref(30)
 
 const getData = () => {
   Promise.all(getDataApi())
     .then((res) => {
-      // 資料傳一次就好 動頁籤篩選後面動
       stockData.value = res[0].data
-      total.value = Math.ceil(stockData.value.length / pageSize.value)
-      sectorOption.value = res[1].data.map((v) => {
-        if (v.sector === 'Information Technology') {
-          v.sector = 'Technology'
+      sectorOption.value = res[1].data.map((stock) => {
+        if (stock.sector === 'Information Technology') {
+          stock.sector = 'Technology'
         }
-        return v
+        return stock
       })
-
       industryOption.value = res[2].data
     })
     .catch((rej) => {
@@ -427,11 +391,25 @@ onMounted(() => {
   getData()
 })
 
-// 篩選後的股票名
+watchEffect(() => {
+  pageTotal.value = Math.ceil(stockData.value.length / pageSize.value)
+})
+
+const handleSelect = async () => {
+  const [getStockApi, ,] = getDataApi()
+  await getStockApi
+    .then((res) => {
+      stockData.value = res.data
+    })
+    .catch((rej) => {
+      console.log(rej)
+    })
+}
+
 const stockName = computed(() => {
   const data =
     stockData.value.length !== 0
-      ? stockData.value.map((v) => v.symbol).join(',')
+      ? stockData.value.map((stock) => stock.symbol).join(',')
       : undefined
   return data
 })
@@ -446,33 +424,34 @@ const stockByChange = ref([])
 
 watchEffect(async () => {
   if (stockName.value) {
-    const res = await axios.get(stockByChangeApi.value)
-    stockByChange.value = res.data
+    await axios
+      .get(stockByChangeApi.value)
+      .then((res) => {
+        stockByChange.value = res.data
+      })
+      .catch((rej) => {
+        console.log(rej)
+      })
   }
 })
 
 // 篩選後股票(含漲跌幅)
+const sortedStockData = computed(() => {
+  if (!stockByChange.value.length) return undefined
 
-const stockResult = computed(() => {
-  const data = stockByChange.value.length
-    ? stockData.value.map((v) => {
-        let matchSymbol = stockByChange.value.find(
-          (change) => v.symbol === change.symbol
-        )
-        if (matchSymbol) {
-          v.changesPercentage = matchSymbol.changesPercentage
-        }
-        return v
-      })
-    : undefined
-  let dataSlice = data
-  dataSlice = dataSlice
-    ? dataSlice.slice(
-        (page.value - 1) * pageSize.value,
-        page.value * pageSize.value
-      )
-    : undefined
-  return dataSlice
+  const data = stockData.value.map((stock) => {
+    const matchSymbol = stockByChange.value.find(
+      (change) => stock.symbol === change.symbol
+    )
+    return matchSymbol
+      ? { ...stock, changesPercentage: matchSymbol.changesPercentage }
+      : stock
+  })
+
+  return data.slice(
+    (page.value - 1) * pageSize.value,
+    page.value * pageSize.value
+  )
 })
 
 // 數據加上 百萬或 兆的單位
@@ -497,19 +476,17 @@ const numberTranslate = (num) => {
   return num
 }
 
-// 分頁
 const handleSizeChange = (val) => {
   pageSize.value = val
   getData()
 }
 
-// 修改頁面容量
-const handleCurrentChange = (val) => {
+const handleCurrentPageChange = (val) => {
   page.value = val
   getData()
 }
 
-progressDone(stockResult)
+progressDone(sortedStockData)
 </script>
 <style lang="scss" scoped>
 .box1 {
