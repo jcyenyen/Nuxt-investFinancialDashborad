@@ -1,7 +1,7 @@
 <template>
   <NuxtLayout name="header">
     <template #main>
-      <div class="mx-auto">
+      <article class="mx-auto">
         <ClientOnly>
           <highcharts
             v-if="chartOptions"
@@ -10,7 +10,7 @@
             :options="chartOptions"
           />
         </ClientOnly>
-      </div>
+      </article>
     </template>
   </NuxtLayout>
 </template>
@@ -39,7 +39,7 @@ const softwareApi = `https://financialmodelingprep.com/api/v3/stock-screener?mar
 
 // &industry=Infrastructure
 
-const sector = [
+const sectors = [
   'Consumer Electronics',
   'Software—Infrastructure',
   'Semiconductors',
@@ -55,40 +55,34 @@ const sector = [
 
 const stockData = ref()
 
-// 產業篩選
-const sectorFilter = (sector) => {
-  const data = stockData.value
-    ? stockData.value.filter((v) => {
-        return v.industry === sector
-      })
-    : []
-  data.length = data.length <= 10 ? data.length : 10
-  return data
-}
+const filteredStockBySector = (sector) => {
+  if (!stockData.value) return [];
 
-// 各產業篩為最多10個再組合
+  return stockData.value
+    .filter((stock) => stock.industry === sector)
+    .slice(0, 10);
+};
+
+
 const technologyStock = computed(() => {
-  let total = []
-  sector.forEach((v) => {
-    total.push(...sectorFilter(v))
-  })
-  total = total.length ? total : []
-  return total
+  return sectors.reduce((total, sector) => {
+    return total.concat(filteredStockBySector(sector))
+  }, [])
+})
+
+// 篩選後股票代號連接成字串
+const stockName = computed(() => {
+  const data =
+    technologyStock.value.length !== 0
+      ? technologyStock.value.map((stock) => stock.symbol).join(',')
+      : undefined
+  return data
 })
 
 const getData = async () => {
   const res = await axios.get(softwareApi)
   stockData.value = res.data
 }
-
-// 篩選後股票代號連接成字串
-const stockName = computed(() => {
-  const data =
-    technologyStock.value.length !== 0
-      ? technologyStock.value.map((v) => v.symbol).join(',')
-      : undefined
-  return data
-})
 
 onMounted(() => {
   getData()
@@ -102,80 +96,53 @@ const stockByVolumeApi = computed(() => {
 const stockByVolume = ref([])
 
 // 加入行業產業
-const stockFullData = computed(() => {
-  const data =
-    stockByVolume.value.length !== 0
-      ? stockByVolume.value.map((volume) => {
-          let matchSymbol = technologyStock.value.find(
-            (v) => v.symbol === volume.symbol
-          )
-          if (matchSymbol) {
-            volume.sector = matchSymbol.sector
-            volume.industry = matchSymbol.industry
-          }
-          return volume
-        })
-      : undefined
-  return data
+const completeStockData = computed(() => {
+  if (!stockByVolume.value.length) return undefined
+
+  return stockByVolume.value.map((volume) => {
+    const matchSymbol = technologyStock.value.find(
+      (stock) => stock.symbol === volume.symbol
+    )
+    if (matchSymbol) {
+      volume.sector = matchSymbol.sector
+      volume.industry = matchSymbol.industry
+    }
+    return volume
+  })
 })
 
-// 最終圖表顯示data
 const chartData = computed(() => {
-  //底層
-  const data = stockFullData.value
-    ? stockFullData.value.map((v) => {
-        return {
-          id: v.name,
-          name: `<h3 style="font-size:48px;">${
-            v.symbol
-          }</h3><h4 style="font-size:24px;text-align:center;">${twoAfterDecimal(
-            v.changesPercentage
-          )} %</h4>`,
-          colorValue: v.changesPercentage,
-          parent: v.industry,
-          value: v.volume,
-        }
-      })
-    : undefined
-  const industry = stockFullData.value
-    ? new Set(
-        stockFullData.value.map((v) => {
-          return v.industry
-        })
-      )
-    : undefined
-  const sector = stockFullData.value
-    ? new Set(
-        stockFullData.value.map((v) => {
-          return v.sector
-        })
-      )
-    : undefined
+  if (!completeStockData.value) return undefined
 
-  const level1 = sector
-    ? [...sector].map((v) => {
-        const data = {
-          id: v,
-          name: v,
-          color: 'transparent',
-        }
-        return data
-      })
-    : undefined
+  const data = completeStockData.value.map((stock) => ({
+    id: stock.name,
+    name: `<h3 style="font-size:48px;">${
+      stock.symbol
+    }</h3><h4 style="font-size:24px;text-align:center;">${twoAfterDecimal(
+      stock.changesPercentage
+    )} %</h4>`,
+    colorValue: stock.changesPercentage,
+    parent: stock.industry,
+    value: stock.volume,
+  }))
 
-  const level2 = industry
-    ? [...industry].map((v) => {
-        const data = {
-          id: v,
-          name: `<div style="background-color: #000000;width:100px;word-break: break-all;overflow-wrap: break-word;textOverflow: ellipsis;"><h3>${v}</h3></div>`,
-          parent: 'Technology',
-          color: 'transparent',
-        }
-        return data
-      })
-    : undefined
-  const fullData = data ? [...level1, ...level2, ...data] : undefined
-  return fullData
+  const industrySet = new Set(completeStockData.value.map((stock) => stock.industry))
+  const sectorSet = new Set(completeStockData.value.map((stock) => stock.sector))
+
+  const level1 = [...sectorSet].map((sector) => ({
+    id: sector,
+    name: sector,
+    color: 'transparent',
+  }))
+
+  const level2 = [...industrySet].map((industry) => ({
+    id: industry,
+    name: `<div style="background-color: #000000;width:100px;word-break: break-all;overflow-wrap: break-word;textOverflow: ellipsis;"><h3>${industry}</h3></div>`,
+    parent: 'Technology',
+    color: 'transparent',
+  }))
+
+  return [...level1, ...level2, ...data]
 })
 
 watchEffect(async () => {

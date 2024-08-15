@@ -456,25 +456,26 @@ const sortedStockData = computed(() => {
 
 // 數據加上 百萬或 兆的單位
 const numberTranslate = (num) => {
-  num = num.toString()
-  const length = num.length
-  const numberSlice = (start, middle, end) => {
-    const integer = num.slice(start, middle)
-    const decimal = num.slice(middle, end)
-    return { integer, decimal }
-  }
+  const numStr = num.toString();
+  const length = numStr.length;
+
   if (length > 9) {
-    const { integer, decimal } = numberSlice(0, length - 9, length - 7)
-    num = `${integer}.${decimal}B`
+    const integer = numStr.slice(0, length - 9);
+    const decimal = numStr.slice(length - 9, length - 7);
+    return `${integer}.${decimal}B`;
   } else if (length > 6) {
-    const { integer, decimal } = numberSlice(0, length - 6, length - 4)
-    num = `${integer}.${decimal}M`
+    const integer = numStr.slice(0, length - 6);
+    const decimal = numStr.slice(length - 6, length - 4);
+    return `${integer}.${decimal}M`;
   } else if (length > 3) {
-    const { integer, decimal } = numberSlice(0, length - 3, length)
-    num = `${integer},${decimal}`
+    const integer = numStr.slice(0, length - 3);
+    const decimal = numStr.slice(length - 3);
+    return `${integer},${decimal}`;
   }
-  return num
-}
+
+  return numStr;
+};
+
 
 const handleSizeChange = (val) => {
   pageSize.value = val
