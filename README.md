@@ -1,14 +1,12 @@
 # Nuxt3 - 股票資訊圖表網站
 
-****
-
 使用Nuxt3+HighChart+Tailwind，做出一個投資人會去逛的股票資訊圖表網站
+
+![dondon](https://github.com/user-attachments/assets/5f042925-d30f-4fba-961d-21463d7831ee)
 
 [Demo](https://jcyenyen.github.io/Nuxt-investFinancialDashborad)
 
 # 作品說明
-
-****
 
 * 框架 : Nuxt3.js
 
@@ -30,8 +28,6 @@
 
 
 # 執行流程
-
-****
 
 ## Setup
 
