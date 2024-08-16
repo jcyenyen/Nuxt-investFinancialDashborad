@@ -197,12 +197,11 @@ path.value = route.name
 // 股票資料
 const stockData = ref()
 const sortedStockData = computed(() => {
-  const data = stockData.value
+  return stockData.value
     ? Object.entries(stockData.value['Time Series (1min)']).map(
         ([date, values]) => ({ date, ...values })
       )
     : undefined
-  return data
 })
 const selectedStock = ref('AAPL')
 const buttons = ref()
@@ -257,32 +256,42 @@ watchEffect(() => {
 const stockRanking = ref([])
 
 const getData = async (stock = 'AAPL', company = 'Apple Inc.') => {
-  selectedStock.value = stock
-  const stockButtonRes = await getStockButton()
-  const stockDataRes = await getStockData(selectedStock.value)
-  const risingStockRankingRes = await risingStockRanking()
-  const losingStockRankingRes = await losingStockRanking()
-  const activedStockRankingRes = await activedStockRanking()
-  const newsRes = await getNews(
-    sortedSearchTopic.value,
-    searchNewsByStock.value,
-    sortedStartTime.value,
-    sortedEndTime.value
-  )
-  buttons.value = stockButtonRes
-  stockData.value = stockDataRes
-  stockChartName.value = company
-  risingStockRankingRes.length = 5
-  losingStockRankingRes.length = 5
-  activedStockRankingRes.length = 5
-  stockRanking.value = [
+  selectedStock.value = stock;
+  
+  const [
+    stockButtonRes,
+    stockDataRes,
     risingStockRankingRes,
     losingStockRankingRes,
     activedStockRankingRes,
-  ]
-  news.value = newsRes.feed
-  news.value.length = 20
-}
+    newsRes
+  ] = await Promise.all([
+    getStockButton(),
+    getStockData(selectedStock.value),
+    risingStockRanking(),
+    losingStockRanking(),
+    activedStockRanking(),
+    getNews(
+      sortedSearchTopic.value,
+      searchNewsByStock.value,
+      sortedStartTime.value,
+      sortedEndTime.value
+    )
+  ]);
+
+  buttons.value = stockButtonRes;
+  stockData.value = stockDataRes;
+  stockChartName.value = company;
+
+  stockRanking.value = [
+    risingStockRankingRes.slice(0, 5),
+    losingStockRankingRes.slice(0, 5),
+    activedStockRankingRes.slice(0, 5)
+  ];
+
+  news.value = newsRes.feed?.slice(0, 20) || [];
+};
+
 
 onMounted(() => {
   getData()
@@ -297,12 +306,11 @@ const changeStockChart = async (stock, company) => {
 
 // 將資料轉換成[時間,股價]
 const realTimeOffer = computed(() => {
-  return sortedStockData.value
-    ? sortedStockData.value.reverse().map((stock) => {
-        const timeStamp = +dayjs(stock.date)
-        return [timeStamp, parseFloat(stock['2. high'])]
-      })
-    : undefined
+  if (!sortedStockData.value) return undefined
+  return sortedStockData.value.reverse().map((stock) => {
+    const timeStamp = +dayjs(stock.date)
+    return [timeStamp, parseFloat(stock['2. high'])]
+  })
 })
 
 const isStockRises = computed(() => {
@@ -469,10 +477,14 @@ const chooseNews = async () => {
     searchNewsByStock.value,
     sortedStartTime.value,
     sortedEndTime.value
-  )
-  news.value = newsRes.feed.length !== 0 ? newsRes.feed : undefined
-  if (news.value !== undefined) news.value.length = 20
-}
+  );
+
+  if (newsRes.feed?.length) {
+    news.value = newsRes.feed.slice(0, 20);
+  } else {
+    news.value = undefined;
+  }
+};
 
 const isAppleIcon = (name) =>
   name == 'AAPL' ? 'bg-black p-3 rounded-[50%]' : ''

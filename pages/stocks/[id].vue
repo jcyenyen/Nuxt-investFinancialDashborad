@@ -403,7 +403,6 @@ const comparedStockChart = computed(() => {
 const isSearch = ref(false)
 const checkData = ref([])
 const searchAddStock = ref('')
-const searchRemoveStock = ref('')
 
 const multiComparedStockChart = ref([])
 
@@ -438,34 +437,29 @@ const toggleSearch = async () => {
 }
 
 const addChart = async () => {
-  let newChart = []
-  const res = await getStockTrend(searchAddStock.value)
-  newChart = res.historical
-  if (newChart !== undefined) {
-    newChart = newChart.reverse().map((v) => {
-      const timeStamp = +dayjs(v.date)
-      return [timeStamp, v.close]
-    })
+  const res = await getStockTrend(searchAddStock.value);
+  const newChart = res.historical?.reverse().map((v) => [+dayjs(v.date), v.close]);
+  if (newChart?.length) {
     multiComparedStockChart.value.push({
       name: searchAddStock.value.toUpperCase(),
       data: newChart,
-    })
+    });
   } else {
     ElMessageBox.confirm('無此檔股票,請重新搜尋', '提示', {
       showCancelButton: false,
       confirmButtonText: '確定',
       type: 'success',
-    })
+    });
   }
-  inputRef.value.clearInput()
-}
+
+  inputRef.value.clearInput();
+};
 
 const removeChart = (stock) => {
-  searchRemoveStock.value = stock
   multiComparedStockChart.value = multiComparedStockChart.value.filter(
-    (item) => item.name !== searchRemoveStock.value
-  )
-}
+    (item) => item.name !== stock
+  );
+};
 
 // 績效圖表
 const multiChartOptions = computed(() => {
